@@ -7,12 +7,13 @@ import { Signer } from "./signer"
 
 import { Config } from "../node"
 import { operation as api, getAPIData } from "../api"
-import { Key, KeyPair } from "../key"
+import { Key, KeyPair, Address } from "../key"
 import { Generator, HintedObject, IP, SuccessResponse, ErrorResponse } from "../types"
 import { Assert, ECODE, MitumError, ArrayAssert } from "../error"
 import { isOpFact, isHintedObject } from "../utils/typeGuard"
 import { isSuccessResponse } from "../utils"
 import { isBase58Encoded } from "../utils/typeGuard"
+import { HINT } from "../alias"
 
 import * as Base from "./base"
 
@@ -272,10 +273,189 @@ export class OperationResponse extends Operation {
 
 }
 
+const credential = {
+    registerModel(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.CREDENTIAL.REGISTER_MODEL.OPERATION, contract, true);
+    },
+	addTemplate(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.CREDENTIAL.ADD_TEMPLATE.OPERATION, contract, true);
+    },
+	issue(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.CREDENTIAL.ISSUE.OPERATION, contract, true);
+    },
+	revoke(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.CREDENTIAL.REVOKE.OPERATION, contract, true);
+    },
+};
+
+const dao = {
+    registerModel(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.DAO.REGISTER_MODEL.OPERATION, contract, true);
+    },
+	updateModelConfig(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.DAO.UPDATE_MODEL_CONFIG.OPERATION, contract, true);
+    },
+	propose(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.DAO.PROPOSE.OPERATION, contract, true);
+    },
+	cancelProposal(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.DAO.CANCEL_PROPOSAL.OPERATION, contract, true);
+    },
+	register(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.DAO.REGISTER.OPERATION, contract, true);
+    },
+	preSnap(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.DAO.PRE_SNAP.OPERATION, contract, true);
+    },
+	postSnap(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.DAO.POST_SNAP.OPERATION, contract, true);
+    },
+	vote(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.DAO.VOTE.OPERATION, contract, true);
+    },
+	execute(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.DAO.EXECUTE.OPERATION, contract, true);
+    },
+};
+
+const nft = {
+    registerModel(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.NFT.REGISTER_MODEL.OPERATION, contract, true);
+    },
+	updateModelConfig(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.NFT.UPDATE_MODEL_CONFIG.OPERATION, contract, true);
+    },
+	mint(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.NFT.MINT.OPERATION, contract, true);
+    },
+	approveAll(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.NFT.APPROVE_ALL.OPERATION, contract, true);
+    },
+	approve(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.NFT.APPROVE.OPERATION, contract, true);
+    },
+	transfer(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.NFT.TRANSFER.OPERATION, contract, true);
+    },
+	addSignature(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.NFT.ADD_SIGNATURE.OPERATION, contract, true);
+    },
+}
+
+const payment = {
+    registerModel(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.PAYMENT.REGISTER_MODEL.OPERATION, contract, true);
+    },
+	deposit(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.PAYMENT.DEPOSIT.OPERATION, contract, true);
+    },
+	updateAccountSetting(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.PAYMENT.UPDATE_ACCOUNT_SETTING.OPERATION, contract, true);
+    },
+	withdraw(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.PAYMENT.WITHDRAW.OPERATION, contract, true);
+    },
+	transfer(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.PAYMENT.REGISTER_MODEL.OPERATION, contract, true);
+    },
+}
+
+const point = {
+    registerModel(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.POINT.REGISTER_MODEL.OPERATION, contract, true);
+    },
+	mint(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.POINT.MINT.OPERATION, contract, true);
+    },
+	transfer(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.POINT.TRANSFER.OPERATION, contract, true);
+    },
+	multiTransfer(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.POINT.TRANSFERS.OPERATION, contract, true);
+    },
+	approve(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.POINT.APPROVE.OPERATION, contract, true);
+    },
+	multiApprove(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.POINT.APPROVES.OPERATION, contract, true);
+    },
+	burn(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.POINT.BURN.OPERATION, contract, true);
+    },
+	transferFrom(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.POINT.TRANSFER_FROM.OPERATION, contract, true);
+    },
+	multiTransferFrom(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.POINT.TRANSFERS_FROM.OPERATION, contract, true);
+    },
+}
+
+const storage = {
+    registerModel(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.STORAGE.REGISTER_MODEL.OPERATION, contract, true);
+    },
+    createData(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.STORAGE.CREATE_DATA.OPERATION, contract, true);
+    },
+    createDatas(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.STORAGE.CREATE_DATAS.OPERATION, contract, true);
+    },
+    deleteData(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.STORAGE.DELETE_DATA.OPERATION, contract, true);
+    },
+    updateData(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.STORAGE.UPDATE_DATA.OPERATION, contract, true);
+    },
+    updateDatas(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.STORAGE.UPDATE_DATAS.OPERATION, contract, true);
+    },
+}
+
+const timestamp = {
+    registerModel(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.TIMESTAMP.REGISTER_MODEL.OPERATION, contract, true);
+    },
+	issue(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.TIMESTAMP.ISSUE.OPERATION, contract, true);
+    },
+}
+
+const token = {
+    registerModel(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.TOKEN.REGISTER_MODEL.OPERATION, contract, true);
+    },
+	mint(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.TOKEN.MINT.OPERATION, contract, true);
+    },
+	transfer(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.TOKEN.TRANSFER.OPERATION, contract, true);
+    },
+	multiTransfer(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.TOKEN.TRANSFERS.OPERATION, contract, true);
+    },
+	approve(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.TOKEN.APPROVE.OPERATION, contract, true);
+    },
+	multiApprove(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.TOKEN.APPROVES.OPERATION, contract, true);
+    },
+	burn(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.TOKEN.BURN.OPERATION, contract, true);
+    },
+	transferFrom(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.TOKEN.TRANSFER_FROM.OPERATION, contract, true);
+    },
+	multiTransferFrom(contract: string | Address): Base.AllowedOperation {
+        return new Base.AllowedOperation(HINT.TOKEN.TRANSFERS_FROM.OPERATION, contract, true);
+    },
+}
+
 export {
 	Currency, Account, Contract,
 	AuthDID,
 	AccountAbstraction,
 	Signer,
 	Base,
+	credential, dao, nft, payment,
+	point, storage, timestamp, token
 }

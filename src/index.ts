@@ -8,6 +8,8 @@ import {
     Signer,
     AuthDID,
     AccountAbstraction,
+    credential, dao, nft, payment,
+	point, storage, timestamp, token
 } from "./operation"
 import { currency, account, contract } from "./operation/currency/index"
 import { authdid } from "./operation/authdid/index";
@@ -17,6 +19,8 @@ const AllowedOperation = {
     account,
     contract,
     authdid,
+    credential, dao, nft, payment,
+	point, storage, timestamp, token
 } as const;
 
 export class Mitum extends Generator {
