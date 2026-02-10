@@ -6,7 +6,7 @@ import { FactJson } from "./types"
 import { HINT } from "../../alias"
 import { Config } from "../../node"
 import { Address } from "../../key/address"
-import { SortFunc, sha3 } from "../../utils"
+import { sha3 } from "../../utils"
 import { IBuffer, IHintedObject } from "../../types"
 import { CurrencyID, Hint, Token } from "../../common"
 import { Assert, ECODE, MitumError } from "../../error"
@@ -75,7 +75,7 @@ export abstract class OperationFact<T extends Item> extends Fact {
         return Buffer.concat([
             super.toBuffer(),
             this.sender.toBuffer(),
-            Buffer.concat(this.items.sort(SortFunc).map((i) => i.toBuffer())),
+            Buffer.concat(this.items.map((i) => i.toBuffer())),
         ])
     }
 
@@ -83,7 +83,7 @@ export abstract class OperationFact<T extends Item> extends Fact {
         return {
             ...super.toHintedObject(),
             sender: this.sender.toString(),
-            items: this.items.sort(SortFunc).map(i => i.toHintedObject()),
+            items: this.items.map(i => i.toHintedObject()),
         }
     }
 }

@@ -5,7 +5,6 @@ import { HINT } from "../../alias"
 import { Config } from "../../node"
 import { Address } from "../../key/address"
 import type { Amount } from "../../common"
-import { SortFunc } from "../../utils"
 import type { HintedObject } from "../../types"
 import { Assert, ECODE, MitumError } from "../../error"
 
@@ -62,14 +61,14 @@ export class MintFact extends NodeFact {
     toBuffer(): Buffer {
         return Buffer.concat([
             super.toBuffer(),
-            Buffer.concat(this.items.sort(SortFunc).map(it => it.toBuffer())),
+            Buffer.concat(this.items.map(it => it.toBuffer())),
         ])
     }
 
     toHintedObject(): FactJson {
         return {
             ...super.toHintedObject(),
-            items: this.items.sort(SortFunc).map(it => it.toHintedObject()),
+            items: this.items.map(it => it.toHintedObject()),
         }
     }
 
