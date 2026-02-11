@@ -370,23 +370,14 @@ const point = {
 	transfer(contract: string | Address): Base.AllowedOperation {
         return new Base.AllowedOperation(HINT.POINT.TRANSFER.OPERATION, contract, true);
     },
-	multiTransfer(contract: string | Address): Base.AllowedOperation {
-        return new Base.AllowedOperation(HINT.POINT.TRANSFERS.OPERATION, contract, true);
-    },
 	approve(contract: string | Address): Base.AllowedOperation {
         return new Base.AllowedOperation(HINT.POINT.APPROVE.OPERATION, contract, true);
-    },
-	multiApprove(contract: string | Address): Base.AllowedOperation {
-        return new Base.AllowedOperation(HINT.POINT.APPROVES.OPERATION, contract, true);
     },
 	burn(contract: string | Address): Base.AllowedOperation {
         return new Base.AllowedOperation(HINT.POINT.BURN.OPERATION, contract, true);
     },
 	transferFrom(contract: string | Address): Base.AllowedOperation {
         return new Base.AllowedOperation(HINT.POINT.TRANSFER_FROM.OPERATION, contract, true);
-    },
-	multiTransferFrom(contract: string | Address): Base.AllowedOperation {
-        return new Base.AllowedOperation(HINT.POINT.TRANSFERS_FROM.OPERATION, contract, true);
     },
 }
 
@@ -397,17 +388,11 @@ const storage = {
     createData(contract: string | Address): Base.AllowedOperation {
         return new Base.AllowedOperation(HINT.STORAGE.CREATE_DATA.OPERATION, contract, true);
     },
-    createDatas(contract: string | Address): Base.AllowedOperation {
-        return new Base.AllowedOperation(HINT.STORAGE.CREATE_DATAS.OPERATION, contract, true);
-    },
     deleteData(contract: string | Address): Base.AllowedOperation {
         return new Base.AllowedOperation(HINT.STORAGE.DELETE_DATA.OPERATION, contract, true);
     },
     updateData(contract: string | Address): Base.AllowedOperation {
         return new Base.AllowedOperation(HINT.STORAGE.UPDATE_DATA.OPERATION, contract, true);
-    },
-    updateDatas(contract: string | Address): Base.AllowedOperation {
-        return new Base.AllowedOperation(HINT.STORAGE.UPDATE_DATAS.OPERATION, contract, true);
     },
 }
 
@@ -430,23 +415,14 @@ const token = {
 	transfer(contract: string | Address): Base.AllowedOperation {
         return new Base.AllowedOperation(HINT.TOKEN.TRANSFER.OPERATION, contract, true);
     },
-	multiTransfer(contract: string | Address): Base.AllowedOperation {
-        return new Base.AllowedOperation(HINT.TOKEN.TRANSFERS.OPERATION, contract, true);
-    },
 	approve(contract: string | Address): Base.AllowedOperation {
         return new Base.AllowedOperation(HINT.TOKEN.APPROVE.OPERATION, contract, true);
-    },
-	multiApprove(contract: string | Address): Base.AllowedOperation {
-        return new Base.AllowedOperation(HINT.TOKEN.APPROVES.OPERATION, contract, true);
     },
 	burn(contract: string | Address): Base.AllowedOperation {
         return new Base.AllowedOperation(HINT.TOKEN.BURN.OPERATION, contract, true);
     },
 	transferFrom(contract: string | Address): Base.AllowedOperation {
         return new Base.AllowedOperation(HINT.TOKEN.TRANSFER_FROM.OPERATION, contract, true);
-    },
-	multiTransferFrom(contract: string | Address): Base.AllowedOperation {
-        return new Base.AllowedOperation(HINT.TOKEN.TRANSFERS_FROM.OPERATION, contract, true);
     },
 }
 
