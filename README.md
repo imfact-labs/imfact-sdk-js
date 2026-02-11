@@ -1,19 +1,19 @@
 ## Abstraction
 
-- __mitumjs__ is the official JavaScript/TypeScript SDK for the Mitum blockchain.
-- The Mitum blockchain operates on a __multi-sig account__ basis. However, for user convenience, __single-sig__ is prioritized.
+- __imfact-sdk-js__ is the official JavaScript/TypeScript SDK for the ImFACT blockchain.
+- The ImFACT blockchain operates on a __multi-sig account__ basis. However, for user convenience, __single-sig__ is prioritized.
 - Method names are designed to be called intuitively from the user's perspective and use camelCase notation for consistency.
 
 <br>
 
 ## 1. Install (Recommended)
 
-For all dApp and back-end development, we strongly recommend using the official [npm package](https://www.npmjs.com/package/@mitumjs/mitumjs).
+For all dApp and back-end development, we strongly recommend using the official [npm package](https://www.npmjs.com/package/@imfact/sdk).
 
 This package automatically provides the correct bundle for your environment (Node.js or Browser).
 
 ```bash
-$ npm install @mitumjs/mitumjs
+$ npm install @imfact/sdk
 ```
 
 </br> 
@@ -22,7 +22,7 @@ $ npm install @mitumjs/mitumjs
 
 The SDK provides two main classes, which are both available as **named exports**:
 
-`Mitum`: The main SDK class for core logic. Use this to create operations, generate keys, and communicate directly with a Mitum node (via its **API Endpoint**).
+`Mitum`: The main SDK class for core logic. Use this to create operations, generate keys, and communicate directly with a blockchain node (via its **API Endpoint**).
 
 `BrowserProvider`: The EIP-1193 standard provider. Use this in dApps to connect to browser wallets like Fact Wallet (window.imfact) for account requests and transaction signing.
 
@@ -33,7 +33,7 @@ Use the ES Module (ESM) bundle via `import`. This bundle **includes necessary br
 
 ```jsx
 // Example: Connecting to Fact Wallet in a React dApp
-import { Mitum, BrowserProvider } from '@mitumjs/mitumjs';
+import { Mitum, BrowserProvider } from '@imfact/sdk';
 
 // 1. Initialize the Provider by wrapping the wallet's injected object
 const provider = new BrowserProvider(window.imfact);
@@ -68,7 +68,7 @@ Use the CommonJS (CJS) bundle via require. This bundle uses Node.js native modul
 
 ```jsx
 // Example: Sending a transaction from a Node.js server
-const { Mitum } = require('@mitumjs/mitumjs');
+const { Mitum } = require('@imfact/sdk');
 
 // 1. Initialize the Mitum core class with the Node's API Endpoint URL
 //    This requires the Node's API Endpoint for blockchain queries/submissions.
@@ -100,7 +100,7 @@ sendOperation();
 
 ## 3. Important Functions Note
 
-The operation objects created by the Mitum SDK (e.g., `mitum.currency.transfer(...)`) are **raw transaction messages**.
+The operation objects created by the SDK (e.g., `mitum.currency.transfer(...)`) are **raw transaction messages**.
 
 - They **require signing** via the `.sign()` method (in Node.js) or a `provider.sendTransaction(-)` request (in browsers).
 
@@ -108,12 +108,12 @@ The operation objects created by the Mitum SDK (e.g., `mitum.currency.transfer(.
 
 <br>
 
-## 4. Mitum JS SDK User Guide
-For detailed information on all functions, models, and advanced usage, please refer to our official GitBook documentation.
+## 4. SDK User Guide
+For detailed information on all class, method, and advanced usage, please refer to our official GitBook documentation.
 
 Be sure to check it out before using the SDK.
 
-<a href="https://imfact.gitbook.io/mitum-js-sdk"> 📖 Mitum JS SDK user guide </a>
+<a href="https://imfact.gitbook.io/mitum-js-sdk"> 📖 ImFACT SDK user guide </a>
 
 <br>
 
@@ -141,7 +141,8 @@ Be sure to check it out before using the SDK.
 If you need to contribute to the SDK development, you can build it locally.
 
 ```Bash
-$git clone [https://github.com/ProtoconNet/mitumjs.git$](https://github.com/ProtoconNet/mitumjs.git$) cd mitumjs
+$git clone https://github.com/imfact-labs/imfact-sdk-js.git
+$ cd imfact-sdk-js
 $ npm install
 $ npm run build
 ```

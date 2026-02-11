@@ -5,8 +5,8 @@ import { Block, Node, NetworkID } from "./node"
 import { Utils } from "./utils/transformUnit"
 import { 
     Account, Currency, Contract, 
-    NFT,
-    DAO, KYC, STO,
+    NFT, DAO,
+    // KYC, STO,
     TimeStamp, Credential,
     Token, Point, Storage, Payment,
     Signer
@@ -27,8 +27,8 @@ export class Mitum extends Generator {
     private _nft: NFT
     private _credential: Credential
     private _timestamp: TimeStamp
-    private _sto: STO
-    private _kyc: KYC
+    // private _sto: STO
+    // private _kyc: KYC
     private _dao: DAO
     private _token: Token
     private _point: Point
@@ -55,8 +55,8 @@ export class Mitum extends Generator {
         this._nft = new NFT(this.networkID, this.api, this.delegateIP)
         this._credential = new Credential(this.networkID, this.api, this.delegateIP)
         this._timestamp = new TimeStamp(this.networkID, this.api, this.delegateIP)
-        this._sto = new STO(this.networkID, this.api, this.delegateIP)
-        this._kyc = new KYC(this.networkID, this.api, this.delegateIP)
+        // this._sto = new STO(this.networkID, this.api, this.delegateIP)
+        // this._kyc = new KYC(this.networkID, this.api, this.delegateIP)
         this._dao = new DAO(this.networkID, this.api, this.delegateIP)
         this._token = new Token(this.networkID, this.api, this.delegateIP)
         this._point = new Point(this.networkID, this.api, this.delegateIP)
@@ -82,8 +82,8 @@ export class Mitum extends Generator {
         this._nft = new NFT(this.networkID, this.api, this.delegateIP)
         this._credential = new Credential(this.networkID, this.api, this.delegateIP)
         this._timestamp = new TimeStamp(this.networkID, this.api, this.delegateIP)
-        this._sto = new STO(this.networkID, this.api, this.delegateIP)
-        this._kyc = new KYC(this.networkID, this.api, this.delegateIP)
+        // this._sto = new STO(this.networkID, this.api, this.delegateIP)
+        // this._kyc = new KYC(this.networkID, this.api, this.delegateIP)
         this._dao = new DAO(this.networkID, this.api, this.delegateIP)
         this._token = new Token(this.networkID, this.api, this.delegateIP)
         this._point = new Point(this.networkID, this.api, this.delegateIP)
@@ -133,13 +133,13 @@ export class Mitum extends Generator {
         return this._timestamp
     }
 
-    get sto(): STO {
-        return this._sto
-    }
+    // get sto(): STO {
+    //     return this._sto
+    // }
 
-    get kyc(): KYC {
-        return this._kyc
-    }
+    // get kyc(): KYC {
+    //     return this._kyc
+    // }
 
     get dao(): DAO {
         return this._dao
