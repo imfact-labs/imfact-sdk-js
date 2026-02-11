@@ -1,6 +1,6 @@
 {
-  "name": "@mitumjs/mitumjs-account-abstraction",
-  "version": "1.2.4",
+  "name": "@imfact/account-abstraction",
+  "version": "1.0.0",
   "description": "framework for mitum network",
   "main": "dist/bundle.cjs.cjs",
   "module": "dist/bundle.esm.mjs",
@@ -23,12 +23,12 @@
   "license": "GPL-3.0-or-later",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ProtoconNet/mitumjs.git"
+    "url": "git+https://github.com/imfact-labs/imfact-sdk-js.git#account-abstraction"
   },
   "bugs": {
-    "url": "https://github.com/ProtoconNet/mitumjs/issues"
+    "url": "https://github.com/imfact-labs/imfact-sdk-js/issues"
   },
-  "homepage": "https://github.com/ProtoconNet/mitumjs#readme",
+  "homepage": "https://github.com/imfact-labs/imfact-sdk-js/tree/account-abstraction#readme",
   "devDependencies": {
     "@babel/preset-env": "^7.22.20",
     "@babel/preset-typescript": "^7.22.15",
