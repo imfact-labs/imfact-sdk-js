@@ -283,7 +283,7 @@ export class Document implements IBuffer, IHintedObject {
         if (this.service) {
             obj.service = this.service.map(s => s.toHintedObject());
         } else {
-            obj.service = null;
+            obj.service = [];
         }
 
         return obj;
