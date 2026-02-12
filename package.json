@@ -1,6 +1,6 @@
 {
   "name": "@imfact/account-abstraction",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "framework for mitum network",
   "main": "dist/bundle.cjs.cjs",
   "module": "dist/bundle.esm.mjs",
