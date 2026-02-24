@@ -247,7 +247,7 @@ export const DCODE = {
     // Related to signature
     IV_SIGN: {
         code: "D201",
-        keyword: ["Invalid signing"],
+        keyword: ["Invalid signing", "BaseNodeSign"],
         description: "The private key does not match the address or node sign required or the signatures for the multiSig account do not meet the threshold",
         subject: ""
     },
