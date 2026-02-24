@@ -32,7 +32,6 @@ export default {
         OPERATION: "mitum-currency-update-currency-operation",
     },
     MINT: {
-        ITEM: "mitum-currency-mint-item",
         FACT: "mitum-currency-mint-operation-fact",
         OPERATION: "mitum-currency-mint-operation",
     },
