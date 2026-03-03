@@ -7,7 +7,7 @@ import { UpdateHandlerFact } from "./update-handler"
 import { UpdateRecipientFact } from "./update-recipient"
 import { RegisterCurrencyFact } from "./register-currency"
 import { UpdateCurrencyFact } from "./update-currency"
-import { MintItem, MintFact } from "./mint"
+import { MintFact } from "./mint"
 
 import { CurrencyDesign, CurrencyPolicy, NilFeeer, FixedFeeer, RatioFeeer } from "./currency-design"
 
@@ -291,9 +291,7 @@ export class Currency extends Generator {
             this.networkID,
             new MintFact(
                 TimeStamp.new().UTC(),
-                [
-                    new MintItem(receiver, new Amount(currency, amount))
-                ],
+                receiver, new Amount(currency, amount),
             ),
         )
     }
