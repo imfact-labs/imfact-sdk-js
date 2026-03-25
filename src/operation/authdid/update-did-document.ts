@@ -4,6 +4,7 @@ import { LongString } from "../../types"
 import { CurrencyID } from "../../common"
 import { ContractFact, FactJson } from "../base"
 import { Document } from "./document"
+import { concatBytes } from "../../utils/bytes"
 
 export class UpdateDocumentFact extends ContractFact {
     readonly did: LongString;
@@ -24,12 +25,12 @@ export class UpdateDocumentFact extends ContractFact {
         this._hash = this.hashing();
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.did.toBuffer(),
-            this.document.toBuffer(),
-            this.currency.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.did.toBytes(),
+            this.document.toBytes(),
+            this.currency.toBytes(),
         ])
     }
 

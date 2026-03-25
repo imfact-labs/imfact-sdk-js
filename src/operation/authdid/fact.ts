@@ -4,6 +4,7 @@ import { Address } from "../../key"
 import { CurrencyID } from "../../common"
 import { LongString } from "../../types"
 import { Assert, StringAssert, ECODE, MitumError } from "../../error"
+import { concatBytes } from "../../utils/bytes"
 
 export abstract class DidFact extends ContractFact {
     readonly did: LongString
@@ -27,10 +28,10 @@ export abstract class DidFact extends ContractFact {
         Assert.check(/^[0-9a-f]+$/.test(splited[2]),MitumError.detail(ECODE.INVALID_ADDRESS, `${splited[2]} is not a hexadecimal number`),)
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.did.toBuffer()
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.did.toBytes()
         ])
     }
 

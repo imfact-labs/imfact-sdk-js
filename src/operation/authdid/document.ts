@@ -1,25 +1,27 @@
 import { HINT } from "../../alias"
 import { Hint } from "../../common"
-import { HintedObject, IBuffer, IHintedObject, LongString } from "../../types"
+import { HintedObject, IBytes, IHintedObject, LongString } from "../../types"
 import { Key, PubKey } from "../../key"
 import { Assert, MitumError, ECODE } from "../../error"
 import { validateDID } from "../../utils/typeGuard"
 import { AllowedOperation } from "../base"
+import { concatBytes, hexToBytes } from "../../utils/bytes"
 
 import base58 from "bs58";
 import * as secp256k1 from "@noble/secp256k1";
 
 const SECP256K1_PUB_PREFIX = new Uint8Array([0xe7, 0x01]);
+const encoder = new TextEncoder();
 
-abstract class Authentication implements IBuffer, IHintedObject {
+abstract class Authentication implements IBytes, IHintedObject {
     private hint: Hint
 
     constructor(hint: string) {
         this.hint = new Hint(hint)
     }
 
-    toBuffer(): Buffer {
-        return Buffer.from([])
+    toBytes(): Uint8Array {
+        return new Uint8Array()
     }
 
     toHintedObject(): HintedObject {
@@ -56,7 +58,7 @@ export class AsymKeyAuth extends Authentication {
     
         let compressed: Uint8Array;
         try {
-            compressed = Uint8Array.from(Buffer.from(hex, "hex"));
+            compressed = hexToBytes(hex);
         } catch {
             throw MitumError.detail(ECODE.INVALID_PUBLIC_KEY, "invalid hex public key");
         }
@@ -80,16 +82,16 @@ export class AsymKeyAuth extends Authentication {
         return "z" + base58.encode(data);
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.id.toBuffer(),
-            Buffer.from(this.type),
-            this.controller.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.id.toBytes(),
+            encoder.encode(this.type),
+            this.controller.toBytes(),
             ...(this.publicKeyMultibase
-                ? [Buffer.from(this.publicKeyMultibase)]
+                ? [encoder.encode(this.publicKeyMultibase)]
                 : []),
-            Buffer.from(this.publicKey.toString()),
+            encoder.encode(this.publicKey.toString()),
         ])
     }
 
@@ -150,14 +152,14 @@ export class LinkedAuth extends Authentication {
         });
     }
 
-    toBuffer(): Buffer { 
-        return Buffer.concat([
-            super.toBuffer(), 
-            this.id.toBuffer(), 
-            Buffer.from(this.type), 
-            this.controller.toBuffer(), 
-            this.targetId.toBuffer(), 
-            Buffer.concat(this.allowed.map((a) => a.toBuffer())),
+    toBytes(): Uint8Array { 
+        return concatBytes([
+            super.toBytes(), 
+            this.id.toBytes(), 
+            encoder.encode(this.type), 
+            this.controller.toBytes(), 
+            this.targetId.toBytes(), 
+            concatBytes(this.allowed.map((a) => a.toBytes())),
         ]);
     }
 
@@ -177,7 +179,7 @@ export class LinkedAuth extends Authentication {
     }
 }
 
-export class Service implements IBuffer, IHintedObject {
+export class Service implements IBytes, IHintedObject {
     readonly id: LongString;
     readonly type: LongString;
     readonly service_end_point: LongString;
@@ -192,11 +194,11 @@ export class Service implements IBuffer, IHintedObject {
         this.service_end_point = LongString.from(service_end_point);
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            this.id.toBuffer(),
-            this.type.toBuffer(),
-            this.service_end_point.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            this.id.toBytes(),
+            this.type.toBytes(),
+            this.service_end_point.toBytes(),
         ])
     }
 
@@ -209,7 +211,7 @@ export class Service implements IBuffer, IHintedObject {
     }
 }
 
-export class Document implements IBuffer, IHintedObject {
+export class Document implements IBytes, IHintedObject {
     private hint: Hint;
     readonly context: LongString[];
     readonly id: LongString;
@@ -259,14 +261,18 @@ export class Document implements IBuffer, IHintedObject {
         }
     }
 
-    toBuffer(): Buffer {      
-        return Buffer.concat([
-            Buffer.concat(this.context.map(ctx => ctx.toBuffer())),
-            this.id.toBuffer(),
-            Buffer.concat(this.authentication.map(el => Buffer.concat([el.toBuffer(), Buffer.from([1])]))),
-            Buffer.concat(this.verificationMethod.map(el => el.toBuffer())),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            concatBytes(this.context.map(ctx => ctx.toBytes())),
+            this.id.toBytes(),
+            concatBytes(
+                this.authentication.map(el =>
+                    concatBytes([el.toBytes(), Uint8Array.from([1])])
+                )
+            ),
+            concatBytes(this.verificationMethod.map(el => el.toBytes())),
             ...(this.service
-                ? [Buffer.concat(this.service.map(s => s.toBuffer()))]
+                ? [concatBytes(this.service.map(s => s.toBytes()))]
                 : []),
         ]);
     }

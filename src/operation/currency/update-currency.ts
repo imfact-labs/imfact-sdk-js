@@ -3,6 +3,7 @@ import { FactJson, NodeFact } from "../base"
 
 import { HINT } from "../../alias"
 import { CurrencyID } from "../../common"
+import { concatBytes } from "../../utils/bytes"
 
 export class UpdateCurrencyFact extends NodeFact {
     readonly currency: CurrencyID
@@ -15,11 +16,11 @@ export class UpdateCurrencyFact extends NodeFact {
         this._hash = this.hashing()
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.currency.toBuffer(),
-            this.policy.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.currency.toBytes(),
+            this.policy.toBytes(),
         ])
     }
 

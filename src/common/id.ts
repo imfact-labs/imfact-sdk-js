@@ -1,8 +1,10 @@
-import { Config } from "../node"
-import { IBuffer, IString } from "../types"
+import { Config } from "../node/config"
+import type { IBytes, IString } from "../types"
 import { Assert, ECODE, MitumError } from "../error"
 
-abstract class ID implements IBuffer, IString {
+const encoder = new TextEncoder();
+
+abstract class ID implements IBytes, IString {
     private s: string
 
     constructor(s: string) {
@@ -13,8 +15,8 @@ abstract class ID implements IBuffer, IString {
         return this.toString() === id.toString()
     }
 
-    toBuffer(): Buffer {
-        return Buffer.from(this.s)
+    toBytes(): Uint8Array {
+        return encoder.encode(this.s)
     }
 
     toString(): string {

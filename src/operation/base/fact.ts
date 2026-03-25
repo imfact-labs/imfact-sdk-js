@@ -1,37 +1,37 @@
 import base58 from "bs58"
-
 import { Item } from "./item"
 import { FactJson } from "./types"
-
+import { HINT } from "../../alias"
 import { Config } from "../../node"
-import { Address } from "../../key"
+import { Address } from "../../key/address"
 import { sha3 } from "../../utils"
-import { IBuffer, IHintedObject } from "../../types"
+import { concatBytes } from "../../utils/bytes"
+import { IBytes, IHintedObject } from "../../types"
 import { CurrencyID, Hint, Token } from "../../common"
 import { Assert, ECODE, MitumError } from "../../error"
 
-export abstract class Fact implements IBuffer, IHintedObject {
+export abstract class Fact implements IBytes, IHintedObject {
     private hint: Hint
     readonly token: Token
-    protected _hash: Buffer
+    protected _hash: Uint8Array
     readonly items?: Item[]
 
     protected constructor(hint: string, token: string) {
         this.hint = new Hint(hint)
         this.token = new Token(token)
-        this._hash = Buffer.from([])
+        this._hash = new Uint8Array()
     }
 
-    get hash() {
+    get hash(): Uint8Array {
         return this._hash
     }
 
-    hashing() {
-        return sha3(this.toBuffer())
+    hashing(): Uint8Array {
+        return sha3(this.toBytes())
     }
 
-    toBuffer(): Buffer {
-        return this.token.toBuffer()
+    toBytes(): Uint8Array {
+        return this.token.toBytes()
     }
 
     toHintedObject(): FactJson {
@@ -57,22 +57,24 @@ export abstract class OperationFact<T extends Item> extends Fact {
             Config.ITEMS_IN_FACT.satisfy(items.length),
             MitumError.detail(ECODE.INVALID_ITEMS, "length of items is out of range")
         )
-  
-        Assert.check(
-            new Set(items.map(i => i.toString())).size === items.length,
-            MitumError.detail(ECODE.INVALID_ITEMS, "duplicate items found")
-        ) 
         
+        if (hint !== HINT.NFT.MINT.FACT) {
+            Assert.check(
+                new Set(items.map(i => i.toString())).size === items.length,
+                MitumError.detail(ECODE.INVALID_ITEMS, "duplicate items found")
+            ) 
+        }
+
         this.items = items
 
         this._hash = this.hashing()
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.sender.toBuffer(),
-            Buffer.concat(this.items.map((i) => i.toBuffer())),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.sender.toBytes(),
+            concatBytes(this.items.map((i) => i.toBytes())),
         ])
     }
 
@@ -103,11 +105,11 @@ export abstract class ContractFact extends Fact {
         // this._hash = this.hashing()
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.sender.toBuffer(),
-            this.contract.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.sender.toBytes(),
+            this.contract.toBytes(),
         ])
     }
 

@@ -4,16 +4,19 @@ import { Address } from "./address"
 import { KeyPairType } from "./types"
 
 import { Hint } from "../common"
-import { Config } from "../node"
+import { Config } from "../node/config"
 import { HINT, SUFFIX } from "../alias"
-import { keccak256 } from "../utils"
+import { keccak256 } from "../utils/hash"
 import { Assert, ECODE, MitumError, StringAssert } from "../error"
-import { Big, HintedObject, IBuffer, IHintedObject, IString } from "../types"
+import { Big, HintedObject, IBytes, IHintedObject, IString } from "../types"
+import { concatBytes } from "../utils/bytes"
 
 type BigArg = string | number | Big
 type Pub = [string | Key, BigArg] | PubKey
 
-export class Key implements IBuffer, IString {
+const encoder = new TextEncoder()
+
+export class Key implements IBytes, IString {
     private readonly key: string
     private readonly suffix: string
     readonly type: KeyPairType
@@ -58,8 +61,8 @@ export class Key implements IBuffer, IString {
         return this.key
     }
 
-    toBuffer(): Buffer {
-        return Buffer.from(this.toString())
+    toBytes(): Uint8Array {
+        return encoder.encode(this.toString())
     }
 
     toString(): string {
@@ -67,7 +70,7 @@ export class Key implements IBuffer, IString {
     }
 }
 
-export class PubKey extends Key implements IHintedObject {
+export class PubKey extends Key implements IHintedObject, IBytes {
     private static hint = new Hint(HINT.CURRENCY.KEY)
     readonly weight: Big
 
@@ -86,10 +89,10 @@ export class PubKey extends Key implements IHintedObject {
         )
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.weight.toBuffer("fill")
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.weight.toBytes("fill"),
         ])
     }
 
@@ -102,7 +105,7 @@ export class PubKey extends Key implements IHintedObject {
     }
 }
 
-export class Keys implements IBuffer, IHintedObject {
+export class Keys implements IBytes, IHintedObject {
     private static hint = new Hint(HINT.CURRENCY.KEYS)
     private readonly _keys: PubKey[]
     readonly threshold: Big
@@ -113,19 +116,11 @@ export class Keys implements IBuffer, IHintedObject {
             MitumError.detail(ECODE.INVALID_KEYS, "keys length out of range")
         )
 
-        this._keys = keys.map(
-            k => {
-                if (k instanceof PubKey) {
-                    return k
-                }
-
-                const [key, weight] = k
-                return new PubKey(key instanceof Key ? key.toString() : key, weight)
-            }
-        )
+        this._keys = keys.map(k => k instanceof PubKey ? k : new PubKey(k[0], k[1]))
         this.threshold = threshold instanceof Big ? threshold : new Big(threshold)
-        
+
         const _sum = this._keys.reduce((total, key) => total + key.weight.v, 0);
+
         Assert.check(
             this.threshold.v <= _sum,
             MitumError.detail(ECODE.INVALID_KEYS, `sum of weights under threshold, ${_sum} < ${this.threshold.v}`)
@@ -144,41 +139,58 @@ export class Keys implements IBuffer, IHintedObject {
         return this._keys
     }
 
-    get checksum(): Address {
-        const address = keccak256(this.toBuffer()).subarray(12).toString('hex');
-        const hash = keccak256(Buffer.from(address, 'ascii')).toString('hex');
-        let checksumAddress = '0x';
-        for (let i = 0; i < address.length; i++) {
-            if (parseInt(hash[i], 16) > 7) {
-                checksumAddress += address[i].toUpperCase();
-            } else {
-                checksumAddress += address[i];
+    private sortKeys(): PubKey[] {
+        return [...this._keys].sort((a, b) => {
+            const ab = a.toBytes()
+            const bb = b.toBytes()
+            const len = Math.min(ab.length, bb.length)
+
+            for (let i = 0; i < len; i++) {
+                if (ab[i] !== bb[i]) return ab[i] - bb[i]
             }
-        }
-        // use mitum SUFFIX temporarily
-        return new Address(checksumAddress + SUFFIX.ADDRESS.MITUM)
+            return ab.length - bb.length
+        })
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            Buffer.concat(this._keys.sort(
-                (a, b) => Buffer.compare(Buffer.from(a.toString()), Buffer.from(b.toBuffer()))
-            ).map(k => k.toBuffer())),
-            this.threshold.toBuffer("fill")
+    get checksum(): Address {
+        const raw = keccak256(this.toBytes()).slice(12)
+
+        let hex = ""
+        for (const b of raw) {
+            hex += b.toString(16).padStart(2, "0")
+        }
+
+        const hash = keccak256(encoder.encode(hex))
+
+        const hashHex = Array.from(hash)
+            .map(b => b.toString(16).padStart(2, "0"))
+            .join("")
+
+        let checksum = "0x"
+        for (let i = 0; i < hex.length; i++) {
+            checksum += parseInt(hashHex[i], 16) > 7
+                ? hex[i].toUpperCase()
+                : hex[i]
+        }
+
+        return new Address(checksum + SUFFIX.ADDRESS.MITUM)
+    }
+
+    toBytes(): Uint8Array {
+        return concatBytes([
+            concatBytes(this.sortKeys().map(k => k.toBytes())),
+            this.threshold.toBytes("fill"),
         ])
     }
 
     toHintedObject(): HintedObject {
-        const eHash = keccak256js(this.toBuffer());
+        const eHash = keccak256js(this.toBytes())
+
         return {
             _hint: Keys.hint.toString(),
             hash: eHash.slice(24),
-            keys: this._keys
-            .sort((a, b) =>
-              Buffer.compare(Buffer.from(a.toString()), Buffer.from(b.toBuffer()))
-            )
-            .map((k) => k.toHintedObject()),
-          threshold: this.threshold.v,
+            keys: this.sortKeys().map(k => k.toHintedObject()),
+            threshold: this.threshold.v,
         }
     }
 }

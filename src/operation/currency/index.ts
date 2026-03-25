@@ -557,7 +557,7 @@ export class Account extends KeyG {
         wallet: { wallet: AccountType | AccountType[], operation: Operation<TransferFact> }
     ) {
         const op = wallet.operation;
-        op.sign(privatekey);
+        await op.sign(privatekey);
 
         return await new OP(this.networkID, this.api, this.delegateIP).send(op);
     }

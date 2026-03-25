@@ -1,10 +1,10 @@
 import { HINT } from "../../alias"
-import { Address } from "../../key"
+import { Address } from "../../key/address"
 import { Hint, CurrencyID } from "../../common"
-import { Big, Float, HintedObject, IBuffer, IHintedObject } from "../../types"
-import { Assert, ECODE, MitumError } from "../../error"
+import { Big, Float, HintedObject, IBytes, IHintedObject } from "../../types"
+import { concatBytes } from "../../utils/bytes"
 
-export class CurrencyDesign implements IBuffer, IHintedObject {
+export class CurrencyDesign implements IBytes, IHintedObject {
     private static hint: Hint = new Hint(HINT.CURRENCY.DESIGN)
     readonly initialSupply: Big
     readonly currencyID: CurrencyID
@@ -26,19 +26,16 @@ export class CurrencyDesign implements IBuffer, IHintedObject {
         this.policy = policy
         this.totalSupply = Big.from(initialSupply)
         this.decimal = Big.from(decimal)
-        Assert.check(0 < this.decimal.big, 
-            MitumError.detail(ECODE.CURRENCY.INVALID_CURRENCY_DESIGN, "decimal number must not be set to 0 or below")
-        )
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            this.initialSupply.toBuffer(), 
-            this.currencyID.toBuffer(),
-            this.decimal.toBuffer(),
-            this.genesisAccount.toBuffer(),
-            this.policy.toBuffer(),
-            this.totalSupply.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            this.initialSupply.toBytes(), 
+            this.currencyID.toBytes(),
+            this.decimal.toBytes(),
+            this.genesisAccount.toBytes(),
+            this.policy.toBytes(),
+            this.totalSupply.toBytes(),
         ])
     }
 
@@ -55,7 +52,7 @@ export class CurrencyDesign implements IBuffer, IHintedObject {
     }
 }
 
-export class CurrencyPolicy implements IBuffer, IHintedObject {
+export class CurrencyPolicy implements IBytes, IHintedObject {
     private static hint: Hint = new Hint(HINT.CURRENCY.POLICY)
     readonly newAccountMinBalance: Big
     readonly feeer: Feeer
@@ -65,10 +62,10 @@ export class CurrencyPolicy implements IBuffer, IHintedObject {
         this.feeer = feeer
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            this.newAccountMinBalance.toBuffer(),
-            this.feeer.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            this.newAccountMinBalance.toBytes(),
+            this.feeer.toBytes(),
         ])
     }
 
@@ -81,7 +78,7 @@ export class CurrencyPolicy implements IBuffer, IHintedObject {
     }
 }
 
-abstract class Feeer implements IBuffer, IHintedObject {
+abstract class Feeer implements IBytes, IHintedObject {
     private hint: Hint
     readonly exchangeMinAmount?: Big
 
@@ -93,7 +90,7 @@ abstract class Feeer implements IBuffer, IHintedObject {
         }
     }
 
-    abstract toBuffer(): Buffer
+    abstract toBytes(): Uint8Array
 
     toHintedObject(): HintedObject {
         return {
@@ -107,8 +104,8 @@ export class NilFeeer extends Feeer {
         super(HINT.CURRENCY.FEEER.NIL)
     }
 
-    toBuffer(): Buffer {
-        return Buffer.from([])
+    toBytes(): Uint8Array {
+        return new Uint8Array()
     }
 }
 
@@ -122,11 +119,11 @@ export class FixedFeeer extends Feeer {
         this.amount = Big.from(amount)
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            this.receiver.toBuffer(), 
-            this.amount.toBuffer(), 
-            this.exchangeMinAmount ? this.exchangeMinAmount.toBuffer() : Buffer.from([])
+    toBytes(): Uint8Array {
+        return concatBytes([
+            this.receiver.toBytes(), 
+            this.amount.toBytes(), 
+            this.exchangeMinAmount ? this.exchangeMinAmount.toBytes() : new Uint8Array()
         ])
     }
 
@@ -162,13 +159,13 @@ export class RatioFeeer extends Feeer {
         this.max = max instanceof Big ? max : new Big(max)
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            this.receiver.toBuffer(), 
-            this.ratio.toBuffer(),
-            this.min.toBuffer(),
-            this.max.toBuffer(), 
-            this.exchangeMinAmount ? this.exchangeMinAmount.toBuffer() : Buffer.from([])
+    toBytes(): Uint8Array {
+        return concatBytes([
+            this.receiver.toBytes(), 
+            this.ratio.toBytes(),
+            this.min.toBytes(),
+            this.max.toBytes(), 
+            this.exchangeMinAmount ? this.exchangeMinAmount.toBytes() : new Uint8Array()
         ])
     }
 
@@ -191,4 +188,3 @@ export class RatioFeeer extends Feeer {
         return feeer
     }
 }
-

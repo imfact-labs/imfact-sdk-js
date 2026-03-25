@@ -1,10 +1,16 @@
 import base58 from "bs58"
-import { UserOperationJson, Authentication, ProxyPayer, Settlement, OperationJson, GeneralFactSign, NodeFactSign, SignOption, Operation as OP, Fact } from "./base"
+import { Authentication, ProxyPayer, Settlement, GeneralFactSign, NodeFactSign } from "./base"
+import type { Operation, Fact, UserOperationJson, OperationJson, SignOption } from "./base"
 import { sha3 } from "../utils"
-import { Key, KeyPair, NodeAddress } from "../key"
+import { Key } from "../key/pub"
+import { KeyPair } from "../key/keypair"
+import { NodeAddress } from "../key/address"
 import { Generator, HintedObject, FullTimeStamp, TimeStamp, IP } from "../types"
 import { StringAssert, Assert, ECODE, MitumError } from "../error"
 import { isOpFact, isHintedObject, isHintedObjectFromUserOp} from "../utils/typeGuard"
+import { concatBytes } from "../utils/bytes"
+
+const encoder = new TextEncoder()
 
 export class Signer extends Generator {
 
@@ -16,39 +22,77 @@ export class Signer extends Generator {
     }
     
     /**
-     * Sign the given operation in JSON format using given private key.
-	 * @param {string | Key} [privatekey] - The private key used for signing.
-	 * @param {Operation<Fact> | HintedObject} [operation] - The operation to be signed.
-	 * @param {SignOption} [option] - (Optional) Option for node sign.
-	 * @returns The signed operation in JSON object (HintedObject).
+     * Signs the given operation using the provided private key.
+     *
+     * This method supports both raw Operation instances and JSON representations.
+     * Internally, all inputs are normalized into OperationJson format before signing.
+     *
+     * @param {string | Key} privatekey - The private key used for signing.
+     * @param {Operation<Fact> | OperationJson | string} operation - The operation to sign.
+     *        Accepts:
+     *          - Operation instance
+     *          - OperationJson object
+     *          - JSON string (parsable to OperationJson)
+     * @param {SignOption} [option] - Optional signing options (e.g. node address for NodeFactSign).
+     *
+     * @returns {Promise<OperationJson>} The signed operation in OperationJson format.
+     *
+     * @throws {MitumError} If the operation format is invalid or signing fails.
      */
-    sign(
+    async sign(
         privatekey: string | Key,
-        operation: OP<Fact> | HintedObject,
+        operation: Operation<Fact> | HintedObject | string,
         option?: SignOption
-    ) {
+    ): Promise<OperationJson> {
+        if (typeof operation === "string") {
+            try {
+                operation = JSON.parse(operation);
+            } catch {
+                throw MitumError.detail(ECODE.INVALID_OPERATION, `input can not be recontructed into HintedObject format`)
+            }
+        }
+
         Assert.check(
 			isOpFact(operation) || isHintedObject(operation), 
 			MitumError.detail(ECODE.INVALID_OPERATION, `input is neither in OP<Fact> nor HintedObject format`)
 		)
-		operation = isOpFact(operation) ? operation.toHintedObject() : operation;
+
+        let opJson: OperationJson;
+
+        if (isOpFact(operation)) {
+            opJson = operation.toHintedObject();
+        } else if (isHintedObject(operation)) {
+            opJson = operation as OperationJson;
+        } else {
+            throw MitumError.detail(ECODE.INVALID_OPERATION, "invalid operation type");
+        }
+
         Key.from(privatekey);
         const keypair = KeyPair.fromPrivateKey(privatekey)
-        return option ? this.nodeSign(keypair as KeyPair, operation as OperationJson, option.node ?? "") : this.accSign(keypair as KeyPair, operation as OperationJson)
+        return option 
+            ? await this.nodeSign(keypair as KeyPair, opJson, option.node ?? "")
+            : await this.accSign(keypair as KeyPair, opJson)
     }
 
-    private accSign(keypair: KeyPair, operation: OperationJson) {
+    private async accSign(keypair: KeyPair, operation: OperationJson): Promise<OperationJson> {
         const now = TimeStamp.new()
+
+        const hash = operation.fact.hash;
+
+        Assert.check(
+            typeof hash === "string" && hash.length > 0,
+            MitumError.detail(ECODE.INVALID_OPERATION, "empty fact hash")
+        )
+
+        const msgToSign = concatBytes([
+            encoder.encode(this.networkID),
+            base58.decode(operation.fact.hash),
+            now.toBytes(),
+        ])
 
         const fs = new GeneralFactSign(
             keypair.publicKey.toString(),
-            keypair.sign(
-                Buffer.concat([
-                    Buffer.from(this.networkID),
-                    base58.decode(operation.fact.hash),
-                    now.toBuffer(),
-                ])
-            ),
+            await keypair.sign(msgToSign),
             now.toString(),
         ).toHintedObject()
 
@@ -63,19 +107,17 @@ export class Signer extends Generator {
             MitumError.detail(ECODE.INVALID_FACTSIGNS, "duplicate signers found in factsigns"),
         )
 
-        const factSigns = operation.signs
-            .map((s) =>
-                Buffer.concat([
-                    Buffer.from(s.signer),
-                    base58.decode(s.signature),
-                    new FullTimeStamp(s.signed_at).toBuffer("super"),
-                ])
-            )
-            //.sort((a, b) => Buffer.compare(a, b))
+        const factSigns = operation.signs.map((s) =>
+            concatBytes([
+                encoder.encode(s.signer),
+                base58.decode(s.signature),
+                new FullTimeStamp(s.signed_at).toBytes("super"),
+            ])
+        )
 
-        const msg = Buffer.concat([
+        const msg = concatBytes([
             base58.decode(operation.fact.hash),
-            Buffer.concat(factSigns),
+            concatBytes(factSigns),
         ])
 
         if (isHintedObjectFromUserOp(operation as UserOperationJson)) {
@@ -88,42 +130,44 @@ export class Signer extends Generator {
     }
 
 
-    private nodeSign(keypair: KeyPair, operation: OperationJson, node: string) {
+    private async nodeSign(keypair: KeyPair, operation: OperationJson, node: string): Promise<OperationJson> {
         const nd = new NodeAddress(node)
         const now = TimeStamp.new()
+        const msgToSign = concatBytes([
+            encoder.encode(this.networkID),
+            nd.toBytes(),
+            base58.decode(operation.fact.hash),
+            now.toBytes(),
+        ])
+
         const fs = new NodeFactSign(
             node,
             keypair.publicKey.toString(),
-            keypair.sign(
-                Buffer.concat([
-                    Buffer.from(this.networkID),
-                    nd.toBuffer(),
-                    base58.decode(operation.fact.hash),
-                    now.toBuffer(),
-                ])
-            ),
+            await keypair.sign(msgToSign),
             now.toString(),
         ).toHintedObject()
 
-        if (operation.signs) {
-            operation.signs = [...operation.signs, fs]
-        } else {
-            operation.signs = [fs]
-        }
-
+        operation.signs = operation.signs ? [...operation.signs, fs] : [fs]
+        
         const factSigns = operation.signs
             .map((s) =>
-                Buffer.concat([
-                    Buffer.from(s.signer),
+                concatBytes([
+                    encoder.encode(s.signer),
                     base58.decode(s.signature),
-                    new FullTimeStamp(s.signed_at).toBuffer("super"),
+                    new FullTimeStamp(s.signed_at).toBytes("super"),
                 ])
             )
-            .sort((a, b) => Buffer.compare(a, b))
+            .sort((a, b) => {
+                const len = Math.min(a.length, b.length)
+                for (let i = 0; i < len; i++) {
+                    if (a[i] !== b[i]) return a[i] - b[i]
+                }
+                return a.length - b.length
+            })
 
-        const msg = Buffer.concat([
+        const msg = concatBytes([
             base58.decode(operation.fact.hash),
-            Buffer.concat(factSigns),
+            concatBytes(factSigns),
         ])
 
         operation.hash = base58.encode(sha3(msg))
@@ -131,7 +175,7 @@ export class Signer extends Generator {
         return operation
     }
 
-    private FillUserOpHash(userOperation: UserOperationJson) {
+    private FillUserOpHash(userOperation: UserOperationJson): UserOperationJson {
         const { extension } = userOperation;
         const { authentication, settlement, proxy_payer } = extension;
     
@@ -153,14 +197,16 @@ export class Signer extends Generator {
             return { authentication: auth, settlement: settlementObj };
         })();
     
-        const msg = Buffer.concat([
-            Buffer.from(JSON.stringify(hintedExtension)),
+        const msg = concatBytes([
+            encoder.encode(JSON.stringify(hintedExtension)),
             base58.decode(userOperation.fact.hash),
-            Buffer.concat(userOperation.signs.map((s) => Buffer.concat([
-                Buffer.from(s.signer),
-                base58.decode(s.signature),
-                new FullTimeStamp(s.signed_at).toBuffer("super"),
-            ]))),
+            concatBytes(userOperation.signs.map((s) =>
+                concatBytes([
+                    encoder.encode(s.signer),
+                    base58.decode(s.signature),
+                    new FullTimeStamp(s.signed_at).toBytes("super"),
+                ])
+            )),
         ]);
     
         userOperation.hash = base58.encode(sha3(msg));

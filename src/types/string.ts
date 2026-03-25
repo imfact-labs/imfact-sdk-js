@@ -1,12 +1,14 @@
-import { IBuffer, IString } from "../types"
+import { IBytes, IString } from "../types"
 import { Assert, ECODE, MitumError } from "../error"
 
-export class LongString implements IBuffer, IString {
+const encoder = new TextEncoder();
+
+export class LongString implements IBytes, IString {
     private s: string
 
     constructor(s: string) {
-        Assert.check(s !== "", MitumError.detail(ECODE.EMPTY_STRING, "empty string"))
         Assert.check(typeof(s) === "string", MitumError.detail(ECODE.INVALID_TYPE, `${s} is not in string type`))
+        Assert.check(s !== "", MitumError.detail(ECODE.EMPTY_STRING, "empty string"))
         this.s = s
     }
 
@@ -14,8 +16,8 @@ export class LongString implements IBuffer, IString {
         return s instanceof LongString ? s : new LongString(s)
     }
 
-    toBuffer(): Buffer {
-        return Buffer.from(this.s)
+    toBytes(): Uint8Array {
+        return encoder.encode(this.s)
     }
 
     toString(): string {
@@ -40,6 +42,8 @@ export class ShortDate extends LongString {
 export class IP extends LongString {
     constructor(s: string) {
         super(s)
+        Assert.check(typeof(s) === "string", MitumError.detail(ECODE.INVALID_TYPE, `${s} is not in string type`))
+        Assert.check(s !== "", MitumError.detail(ECODE.EMPTY_STRING, "empty string"))
         Assert.check(
             /^(http|https):\/\/(?:[\w-]+\.)*[\w-]+(?::\d+)?(?:\/[\w-./?%&=]*)?$/.test(s),
             MitumError.detail(ECODE.INVALID_IP, "invalid ip address, ip"),
@@ -51,11 +55,22 @@ export class IP extends LongString {
     }
 }
 
-export class URIString {
+export class URIString implements IBytes, IString {
+    private s: string
+
     constructor(s: string, name: string) {
         Assert.check(
             (/^[^\s:/?#\[\]@]*$/.test(s)), 
             MitumError.detail(ECODE.INVALID_CHARACTER, `${name} must not contain: space / : ? # [ ] @`)
         )
+        this.s = s
+    }
+
+    toBytes(): Uint8Array {
+        return encoder.encode(this.s)
+    }
+
+    toString(): string {
+        return this.s
     }
 }

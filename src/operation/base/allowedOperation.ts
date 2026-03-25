@@ -2,7 +2,9 @@ import { Hint } from "../../common";
 import { Address } from "../../key";
 import { Allowed } from "./types";
 import { MitumError, ECODE } from "../../error";
+import { concatBytes } from "../../utils/bytes";
 
+const encoder = new TextEncoder();
 
 export class AllowedOperation {
         readonly contract?: Address;
@@ -32,14 +34,14 @@ export class AllowedOperation {
                 : undefined;
         }
     
-        toBuffer(): Buffer {
+        toBytes(): Uint8Array {
             if (!this.contract) {
-                return Buffer.from(this.operationHint.toString());
+                return encoder.encode(this.operationHint.toString());
             }
     
-            return Buffer.concat([
-                this.contract.toBuffer(),
-                Buffer.from(this.operationHint.toString())
+            return concatBytes([
+                this.contract.toBytes(),
+                encoder.encode(this.operationHint.toString())
             ]);
         }
     

@@ -16,6 +16,7 @@ import { isBase58Encoded } from "../utils/typeGuard"
 import { HINT } from "../alias"
 
 import * as Base from "./base"
+const encoder = new TextEncoder();
 
 export class Operation extends Generator {
 	constructor(
@@ -24,6 +25,20 @@ export class Operation extends Generator {
 		delegateIP?: string | IP,
 	) {
 		super(networkID, api, delegateIP)
+	}
+
+	private hasAuthenticationExtension(op: any): op is {
+		extension: { authentication: { proof_data: string } }
+	} {
+		return (
+			op &&
+			typeof op === "object" &&
+			"extension" in op &&
+			op.extension &&
+			"authentication" in op.extension &&
+			op.extension.authentication &&
+			"proof_data" in op.extension.authentication
+		);
 	}
 
 	/**
@@ -120,21 +135,24 @@ export class Operation extends Generator {
 
 	/**
 	 * Sign the given operation using the provided private key or key pair.
-	 * @param {string | Key | KeyPair} [privatekey] - The private key or key pair for signing.
-	 * @param {OP<Fact>} [operation] - The operation to sign.
+	 * @param {string | Key | KeyPair} privatekey - The private key or key pair for signing.
+	 * @param {OP<Fact>} operation - The operation to sign.
 	 * @param {SignOption} [option] - (Optional) Option for node sign.
-	 * @returns The signed operation.
+	 * @returns {Promise<OP<Fact>>} A Promise that resolves to the signed operation.
 	 */
-	sign(
+	async sign(
 		privatekey: string | Key | KeyPair,
 		operation: OP<Fact>,
 		option?: SignOption,
-	) {
-		const op = operation;
-		op.sign(privatekey instanceof KeyPair ? privatekey.privateKey : privatekey, option)
+	): Promise<OP<Fact>> {
+		const op = operation
+
+		await op.sign(
+			privatekey instanceof KeyPair ? privatekey.privateKey : privatekey,
+			option
+	)
 		return op
 	}
-
 
 	/**
 	 * Send the given singed operation to blockchain network.
@@ -159,30 +177,60 @@ export class Operation extends Generator {
 		operation: HintedObject | OP<Fact>,
 		headers?: { [i: string]: any }
 	): Promise<OperationResponse> {
-		Assert.check( this.api !== undefined && this.api !== null, MitumError.detail(ECODE.NO_API, "API is not provided"));
-		Assert.check(
-			isOpFact(operation) || isHintedObject(operation), 
-			MitumError.detail(ECODE.INVALID_OPERATION, `input is neither in OP<Fact> nor HintedObject format`)
-		)
-		const hintedOperation = isOpFact(operation) ? operation.toHintedObject() : operation
-		Assert.check(
-			hintedOperation.signs.length !== 0, 
-			MitumError.detail(ECODE.EMPTY_SIGN, `signature is required before sending the operation`)
-		)
-		Assert.check(
-			Config.OP_SIZE.satisfy(Buffer.byteLength(JSON.stringify(hintedOperation), 'utf8')),
-			MitumError.detail(ECODE.OP_SIZE_EXCEEDED, `Operation size exceeds the allowed limit of ${Config.OP_SIZE.max} bytes.`)
-		)
+		Assert.check(this.api != null, MitumError.detail(ECODE.NO_API, "API is not provided"));
+		if (operation && typeof (operation as any).then === "function") {
+			throw MitumError.detail(
+				ECODE.INVALID_OPERATION,
+				"Invalid operation: received a Promise instead of a signed operation. Did you forget to 'await' a signing function?"
+			);
+		}
 
-		const sendResponse = await getAPIData(() => 
-		api.send(
-			this.api,
-			hintedOperation, 
-			this.delegateIP, 
-			headers
-		  )
+		if ((operation as any)._isAlterSigning) {
+			throw MitumError.detail(
+				ECODE.INVALID_OPERATION,
+				"Alternative signature is still being processed. Did you forget to await addAlterSign()?"
+			);
+		}
+
+		const isFactOp = isOpFact(operation);
+		const isHintedOp = isHintedObject(operation);
+		Assert.check(
+			isFactOp || isHintedOp,
+			MitumError.detail(
+				ECODE.INVALID_OPERATION,
+				"input is neither in OP<Fact> nor HintedObject format"
+			)
+		);
+		
+		const opJson = isFactOp
+			? operation.toHintedObject()
+			: operation;
+		Assert.check(
+			opJson.signs?.length > 0,
+			MitumError.detail(
+				ECODE.EMPTY_SIGN,
+				"signature is required before sending the operation"
+			)
+		);
+		
+		const json = JSON.stringify(opJson);
+		const byteLength = encoder.encode(json).length;
+		Assert.check(
+			Config.OP_SIZE.satisfy(byteLength),
+			MitumError.detail(
+				ECODE.OP_SIZE_EXCEEDED,
+				`Operation size exceeds the allowed limit of ${Config.OP_SIZE.max} bytes.`
+			)
 		);
 
+		if (this.hasAuthenticationExtension(opJson) && opJson.extension.authentication.proof_data === "") {
+			throw MitumError.detail(
+				ECODE.INVALID_USER_OPERATION,
+				"Missing proof_data. Did you forget to await addAlterSign()?"
+			);
+		}
+	
+		const sendResponse = await getAPIData(() => api.send(this.api, opJson, this.delegateIP, headers));
 		return new OperationResponse(sendResponse, this.networkID, this.api, this.delegateIP)
 	}
 }

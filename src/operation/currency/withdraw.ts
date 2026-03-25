@@ -2,11 +2,12 @@ import { CurrencyItem } from "./item"
 import { OperationFact } from "../base"
 
 import { HINT } from "../../alias"
-import { Address } from "../../key"
+import { Address } from "../../key/address"
 import { Amount } from "../../common"
 import { SortFunc } from "../../utils"
 import { HintedObject } from "../../types"
 import { Assert, ECODE, MitumError } from "../../error"
+import { concatBytes } from "../../utils/bytes"
 
 export class WithdrawItem extends CurrencyItem {
     readonly target: Address
@@ -16,10 +17,10 @@ export class WithdrawItem extends CurrencyItem {
         this.target = typeof target === "string" ? new Address(target) : target
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            this.target.toBuffer(),
-            Buffer.concat(this.amounts.sort(SortFunc).map(am => am.toBuffer())),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            this.target.toBytes(),
+            concatBytes(this.amounts.sort(SortFunc).map(am => am.toBytes())),
         ])
     }
 

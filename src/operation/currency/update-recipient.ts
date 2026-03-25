@@ -6,6 +6,7 @@ import { SortFunc } from "../../utils"
 import { CurrencyID } from "../../common"
 import { ArrayAssert } from "../../error"
 import { Config } from "../../node"
+import { concatBytes } from "../../utils/bytes"
 
 export class UpdateRecipientFact extends Fact {
     readonly sender: Address
@@ -32,13 +33,13 @@ export class UpdateRecipientFact extends Fact {
             .noDuplicates();
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.sender.toBuffer(),
-            this.contract.toBuffer(),
-            this.currency.toBuffer(),
-            Buffer.concat(this.recipients.sort(SortFunc).map(a => a.toBuffer())),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.sender.toBytes(),
+            this.contract.toBytes(),
+            this.currency.toBytes(),
+            concatBytes(this.recipients.sort(SortFunc).map(a => a.toBytes())),
         ])
     }
 

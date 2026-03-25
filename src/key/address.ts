@@ -1,20 +1,18 @@
 import { AddressType } from "./types"
 import { SUFFIX } from "../alias"
-import { Config } from "../node"
+import { Config } from "../node/config"
 import { CurrencyID } from "../common"
-import { IBuffer, IString } from "../types"
+import { IBytes, IString } from "../types"
 import { ECODE, MitumError, StringAssert, Assert } from "../error"
-import { getChecksum } from "../utils";
+import { getChecksum } from "../utils/hash";
 
-abstract class BaseAddress implements IBuffer, IString {
+const encoder = new TextEncoder();
+
+abstract class BaseAddress implements IBytes, IString {
     private s: string
     readonly type: AddressType
 
-    constructor(s: unknown, type?: AddressType) {
-        if (typeof s !== "string") {
-            throw MitumError.detail(ECODE.INVALID_ADDRESS, `address must be a string, got ${typeof s}`);
-        }
-        
+    constructor(s: string, type?: AddressType) {
         this.s = s
 
         if (type) {
@@ -30,8 +28,8 @@ abstract class BaseAddress implements IBuffer, IString {
         }
     }
 
-    toBuffer(): Buffer {
-        return Buffer.from(this.s)
+    toBytes(): Uint8Array {
+        return encoder.encode(this.s)
     }
 
     toString(): string {

@@ -1,4 +1,4 @@
-import { Fact, UserOperation, Authentication, ProxyPayer, Settlement } from "../base"
+import { Fact, UserOperation, Authentication, ProxyPayer, Settlement, OperationJson } from "../base"
 import { isUserOp, isHintedObjectFromUserOp } from "../../utils/typeGuard"
 import { Generator, HintedObject, IP } from "../../types"
 import { Key, KeyPair, Address } from "../../key"
@@ -36,27 +36,38 @@ export class AccountAbstraction extends Generator {
         );
     }
 
- 	/**
-	 * Add alternative signature for userOperation, fill `proof_data` item of `authentication` object.
-	 * @param {string | Key | KeyPair} [privateKey] - The private key or key pair for signing.
-	 * @param {UserOperation<Fact> | HintedObject} [userOperation] - The operation to be signed.
-	 * @returns The user operation fill with authentication.
-	 */
-    // addAlterSign(privateKey: string | Key, type?: "ed25519" | "ecdsa") {
-    addAlterSign(
+    /**
+     * Adds an alternative signature to a user operation by filling the `proof_data`
+     * field of the `authentication` object.
+     *
+     * This method accepts either a `UserOperation` instance or a JSON-formatted
+     * hinted object. The operation is normalized internally and returned in
+     * hinted-object (JSON) format after the signature is applied.
+     *
+     * @param {string | Key} privateKey - The private key used to generate the signature.
+     * @param {UserOperation<Fact> | HintedObject} userOperation - The user operation to update.
+     * @returns {Promise<HintedObject | OperationJson>} A hinted-object representation of the user operation
+     * with the `authentication.proof_data` field populated.
+     */
+    async addAlterSign(
         privateKey: string | Key,
         userOperation: UserOperation<Fact> | HintedObject
-    ) {
+    ): Promise<HintedObject | OperationJson> {
         Assert.check(
-			isUserOp(userOperation) || isHintedObjectFromUserOp(userOperation), 
-			MitumError.detail(ECODE.INVALID_USER_OPERATION, `Input must in UserOperation format`)
-		)
-		const hintedUserOp = isUserOp(userOperation) ? userOperation.toHintedObject() : userOperation;
+            isUserOp(userOperation) || isHintedObjectFromUserOp(userOperation), 
+            MitumError.detail(ECODE.INVALID_USER_OPERATION, `Input must in UserOperation format`)
+        )
+        const hintedUserOp: HintedObject = isUserOp(userOperation) ? userOperation.toHintedObject() : userOperation;
+
         privateKey = Key.from(privateKey);
         const keypair = KeyPair.fromPrivateKey<KeyPair>(privateKey);
-        const alterSign = keypair.sign(Buffer.from(base58.decode(hintedUserOp.fact.hash)));
+
+        const hashBytes = base58.decode(hintedUserOp.fact.hash);
+        const alterSign = await keypair.sign(hashBytes);
+
         hintedUserOp.extension.authentication.proof_data = base58.encode(alterSign);
-        return hintedUserOp
+
+        return hintedUserOp;
     }
 
     /**

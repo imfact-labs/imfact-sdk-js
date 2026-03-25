@@ -1,22 +1,43 @@
 import { sha3_256, keccak256 as keccak_256 } from "js-sha3"
 import { sha256 as nobleSha256 } from "@noble/hashes/sha256"
 
-type HashFunction = (msg: string | Buffer) => Buffer
+type Bytes = Uint8Array
+type HashInput = string | Uint8Array
 
-export const sha256: HashFunction = (msg) => Buffer.from(nobleSha256(msg))
-export const sha3: HashFunction = (msg) => Buffer.from(sha3_256.create().update(msg).digest())
-export const keccak256: HashFunction = (msg) => Buffer.from(keccak_256.create().update(msg).digest())
+const encoder = new TextEncoder()
+
+function toBytes(msg: HashInput): Bytes {
+    return typeof msg === "string" ? encoder.encode(msg) : msg
+}
+
+export const sha256 = (msg: HashInput): Bytes => {
+    return nobleSha256(toBytes(msg))
+}
+
+export const sha3 = (msg: HashInput): Bytes => {
+    return new Uint8Array(sha3_256.create().update(toBytes(msg)).digest())
+}
+
+export const keccak256 = (msg: HashInput): Bytes => {
+    return new Uint8Array(keccak_256.create().update(toBytes(msg)).digest())
+}
 
 export const getChecksum = (hex: string): string => {
-    const hexLower = hex.toLowerCase();
-    const hash = keccak256(Buffer.from(hexLower, 'ascii')).toString('hex');
-    let checksum = '';
-    for (let i = 0; i < hexLower.length; i++) {
-        if (parseInt(hash[i], 16) > 7) {
-            checksum += hexLower[i].toUpperCase();
-        } else {
-            checksum += hexLower[i];
-        }
+    const hexLower = hex.toLowerCase()
+
+    const hashBytes = keccak256(encoder.encode(hexLower))
+
+    let hashHex = ""
+    for (const b of hashBytes) {
+        hashHex += b.toString(16).padStart(2, "0")
     }
+
+    let checksum = ""
+    for (let i = 0; i < hexLower.length; i++) {
+        checksum += parseInt(hashHex[i], 16) > 7
+        ? hexLower[i].toUpperCase()
+        : hexLower[i]
+    }
+
     return checksum
 }

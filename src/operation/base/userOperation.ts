@@ -7,12 +7,16 @@ import { Hint } from "../../common"
 import { HINT } from "../../alias"
 import { SortFunc } from "../../utils"
 import { validateDID, isFactJson } from "../../utils/typeGuard"
-import { Assert, ECODE, MitumError, StringAssert } from "../../error"
+import { Assert, ECODE, MitumError } from "../../error"
 import { Address, Key, KeyPair } from "../../key"
 import { HintedObject, HintedExtensionObject, IHintedObject, TimeStamp } from "../../types"
-import { FactJson } from "./types"
+import { FactJson, OperationJson } from "./types"
+import { concatBytes } from "../../utils/bytes"
+import { base64ToBytes, bytesToUtf8 } from "../../utils/base64"
 
 type FactSign = GeneralFactSign | NodeFactSign
+
+const encoder = new TextEncoder();
 
 export class Authentication implements IHintedObject {
     readonly contract: Address;
@@ -86,18 +90,18 @@ export class Settlement implements IHintedObject {
 }
 
 class RestoredFact extends Fact {
-    readonly _hash: Buffer;
+    readonly _hash: Uint8Array;
     readonly factJson: FactJson;
     readonly sender: Address;
 
     constructor(factJson: FactJson) {
-        const token_seed = Buffer.from(factJson.token, "base64").toString("utf8");
+        const token_seed = bytesToUtf8(base64ToBytes(factJson.token));
         const parts = factJson._hint.split('-');
         super(parts.slice(0, parts.length - 1).join('-'), token_seed);
 
         this.factJson = factJson;
         this.sender = new Address(factJson.sender);
-        this._hash = factJson.hash ? this.hashing() : Buffer.from([]);
+        this._hash = factJson.hash ? this.hashing() : new Uint8Array();
     }
 
     get operationHint(): string {
@@ -109,8 +113,8 @@ class RestoredFact extends Fact {
         return this.factJson;
     }
 
-    hashing(): Buffer {
-        return this.factJson.hash ? Buffer.from(base58.decode(this.factJson.hash)) : Buffer.from([]);
+    hashing(): Uint8Array {
+        return this.factJson.hash ? base58.decode(this.factJson.hash): new Uint8Array();
     }
 }
 
@@ -122,7 +126,7 @@ export class UserOperation<T extends Fact> extends Operation<T> {
     protected proxyPayer: null | ProxyPayer
     protected settlement: Settlement
     protected _factSigns: FactSign[]
-    protected _hash: Buffer
+    protected _hash: Uint8Array
     constructor(
         networkID: string,
         fact: T | FactJson,
@@ -156,21 +160,21 @@ export class UserOperation<T extends Fact> extends Operation<T> {
         return this._hash
     }
 
-    toBuffer(): Buffer {
+    toBytes(): Uint8Array {
         if (!this._factSigns) {
-            return this.fact.hash
+            return this.fact.hash;
         }
 
         this._factSigns = this._factSigns.sort(SortFunc);
 
-        return Buffer.concat([
-            Buffer.from(JSON.stringify(this.toHintedExtension())),
+        return concatBytes([
+            encoder.encode(JSON.stringify(this.toHintedExtension())),
             this.fact.hash,
-            Buffer.concat(this._factSigns.map((fs) => fs.toBuffer())),
-        ])
+            concatBytes(this._factSigns.map((fs) => fs.toBytes())),
+        ]);
     }
 
-    toHintedObject(): HintedObject {
+    toHintedObject(): OperationJson {
         const operation = {
             _hint: this.hint.toString(),
             fact: this.fact.toHintedObject(),
@@ -214,16 +218,17 @@ export class UserOperation<T extends Fact> extends Operation<T> {
         );
     }
 
-	/**
-	 * Add alternative signature for userOperation, fill `proof_data` item of `authentication` object.
-	 * @param {string | Key | KeyPair} [privateKey] - The private key or key pair for signing.
-	 * @returns void
-	 */
-    // addAlterSign(privateKey: string | Key, type?: "ed25519" | "ecdsa") {
-    addAlterSign(privateKey: string | Key): void {
+    /**
+     * Adds an alternative signature to the user operation.
+     * This fills the `proof_data` field of the `authentication` object using the provided private key.
+     *
+     * @param {string | Key} privateKey - The private key used to generate the alternative signature.
+     * @returns {Promise<void>} Resolves when the alternative signature has been generated and applied.
+     */
+    async addAlterSign(privateKey: string | Key): Promise<void> {
         privateKey = Key.from(privateKey);
         const keypair = KeyPair.fromPrivateKey<KeyPair>(privateKey);
-        const alterSign = keypair.sign(Buffer.from(this.fact.hash));
+        const alterSign = await keypair.sign(this.fact.hash);
         this.auth = new Authentication(this.auth.contract, this.auth.authenticationId, base58.encode(alterSign)); // base58 인코딩 후 저장
     }
 
@@ -259,11 +264,15 @@ export class UserOperation<T extends Fact> extends Operation<T> {
     }
 
     /**
-     * Sign the given userOperation in JSON format using given private key.
-	 * @param {string | Key} [privatekey] - The private key used for signing.
-	 * @returns void.
+     * Signs the user operation using the provided private key.
+     *
+     * This method validates required fields, generates a signature, and updates the internal
+     * factSigns and operation hash. The signing process is asynchronous and must be awaited.
+     *
+     * @param {string | Key} privatekey - The private key used for signing the operation.
+     * @returns {Promise<void>} Resolves when the operation has been successfully signed.
      */
-    sign(privatekey: string | Key) {
+    async sign(privatekey: string | Key): Promise<void> {
         const userOperationFields = {
             contract: this.auth.contract.toString(),
             authentication_id : this.auth.authenticationId,
@@ -272,16 +281,28 @@ export class UserOperation<T extends Fact> extends Operation<T> {
         };
         
         Object.entries(userOperationFields).forEach(([key, value]) => {
-            StringAssert.with(value, MitumError.detail(ECODE.INVALID_USER_OPERATION,
-                `Cannot sign the user operation: ${key} must not be empty.`)).empty().not().excute();
+            if (!value) {
+                if (key === "proof_data") {
+                    throw MitumError.detail(
+                        ECODE.INVALID_USER_OPERATION,
+                        "Cannot sign the user operation: proof_data is empty. Did you forget to 'await' addAlterSign()?"
+                    );
+                }
+        
+                throw MitumError.detail(
+                    ECODE.INVALID_USER_OPERATION,
+                    `Cannot sign the user operation: ${key} must not be empty.`
+                );
+            }
         });
 
         const keypair = KeyPair.fromPrivateKey(privatekey);
         const now = TimeStamp.new();
+       
 
         const factSign = new GeneralFactSign(
             keypair.publicKey,
-            keypair.sign(Buffer.concat([Buffer.from(this.id), this.fact.hash, now.toBuffer()])),
+            await keypair.sign(concatBytes([encoder.encode(this.id), this.fact.hash, now.toBytes()])),
             now.toString(),
         );
 

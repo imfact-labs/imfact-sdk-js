@@ -1,11 +1,11 @@
 import { Hint } from "./hint"
 import { CurrencyID } from "./id"
-
+import { concatBytes } from "../utils/bytes"
 import { HINT } from "../alias"
 import { Assert, ECODE, MitumError } from "../error"
-import { Big, HintedObject, IBuffer, IHintedObject } from "../types"
+import { Big, HintedObject, IBytes, IHintedObject } from "../types"
 
-export class Amount implements IBuffer, IHintedObject {
+export class Amount implements IBytes, IHintedObject {
     private hint: Hint
     readonly currency: CurrencyID
     readonly big: Big
@@ -14,13 +14,17 @@ export class Amount implements IBuffer, IHintedObject {
         this.hint = new Hint(HINT.CURRENCY.AMOUNT)
         this.currency = CurrencyID.from(currency)
         this.big = Big.from(big)
-        Assert.check(this.big.big > 0, MitumError.detail(ECODE.INVALID_AMOUNT, "amount must be over zero"))
+
+        Assert.check(
+            this.big.big > 0,
+        MitumError.detail(ECODE.INVALID_AMOUNT, "amount must be over zero")
+        )
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            this.big.toBuffer(),
-            this.currency.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            this.big.toBytes(),
+            this.currency.toBytes(),
         ])
     }
 
@@ -33,7 +37,7 @@ export class Amount implements IBuffer, IHintedObject {
     }
 }
 
-export class Fee implements IBuffer, IHintedObject {
+export class Fee implements IBytes, IHintedObject {
     private hint: Hint
     readonly currency: CurrencyID
     readonly big: Big
@@ -42,13 +46,17 @@ export class Fee implements IBuffer, IHintedObject {
         this.hint = new Hint(HINT.CURRENCY.AMOUNT)
         this.currency = CurrencyID.from(currency)
         this.big = Big.from(big)
-        Assert.check(0 <= this.big.big, MitumError.detail(ECODE.INVALID_FACT, "fee must not be under zero"))
+
+        Assert.check(
+            0 <= this.big.big,
+            MitumError.detail(ECODE.INVALID_FACT, "fee must not be under zero")
+        )
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            this.big.toBuffer(),
-            this.currency.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            this.big.toBytes(),
+            this.currency.toBytes(),
         ])
     }
 

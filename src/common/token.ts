@@ -1,7 +1,10 @@
-import { IBuffer, IString } from "../types"
+import { IBytes, IString } from "../types"
 import { Assert, ECODE, MitumError } from "../error"
+import { bytesToBase64 } from "../utils/base64"
 
-export class Token implements IBuffer, IString {
+const encoder = new TextEncoder();
+
+export class Token implements IBytes, IString {
     private s: string
 
     constructor(s: string) {
@@ -13,11 +16,11 @@ export class Token implements IBuffer, IString {
         return s instanceof Token ? s : new Token(s)
     }
 
-    toBuffer(): Buffer {
-        return Buffer.from(this.s)
+    toBytes(): Uint8Array {
+        return encoder.encode(this.s)
     }
 
     toString(): string {
-        return Buffer.from(this.s, "utf8").toString("base64")
+        return bytesToBase64(this.toBytes())
     }
 }

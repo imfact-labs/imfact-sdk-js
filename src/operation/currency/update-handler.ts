@@ -1,11 +1,12 @@
 import { Fact, FactJson } from "../base"
 
 import { HINT } from "../../alias"
-import { Address } from "../../key"
+import { Address } from "../../key/address"
 import { SortFunc } from "../../utils"
 import { CurrencyID } from "../../common"
 import { ArrayAssert } from "../../error"
 import { Config } from "../../node"
+import { concatBytes } from "../../utils/bytes"
 
 export class UpdateHandlerFact extends Fact {
     readonly sender: Address
@@ -32,13 +33,13 @@ export class UpdateHandlerFact extends Fact {
             .noDuplicates();
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.sender.toBuffer(),
-            this.contract.toBuffer(),
-            this.currency.toBuffer(),
-            Buffer.concat(this.handlers.sort(SortFunc).map(a => a.toBuffer())),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.sender.toBytes(),
+            this.contract.toBytes(),
+            this.currency.toBytes(),
+            concatBytes(this.handlers.sort(SortFunc).map(a => a.toBytes())),
         ])
     }
 

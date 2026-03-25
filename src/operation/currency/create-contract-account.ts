@@ -9,6 +9,7 @@ import { HINT } from "../../alias"
 import { HintedObject } from "../../types"
 import { Keys, Address } from "../../key"
 import { Assert, ECODE, MitumError } from "../../error"
+import { concatBytes } from "../../utils/bytes"
 
 export class CreateContractAccountItem extends CurrencyItem {
     readonly keys: Keys
@@ -18,10 +19,10 @@ export class CreateContractAccountItem extends CurrencyItem {
         this.keys = keys
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            this.keys.toBuffer(),
-            Buffer.concat(this.amounts.sort(SortFunc).map(am => am.toBuffer())),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            this.keys.toBytes(),
+            concatBytes(this.amounts.sort(SortFunc).map(am => am.toBytes())),
         ])
     }
 
@@ -33,7 +34,7 @@ export class CreateContractAccountItem extends CurrencyItem {
     }
 
     toString(): string {
-        return base58.encode(this.keys.toBuffer())
+        return base58.encode(this.keys.toBytes())
     }
 }
 

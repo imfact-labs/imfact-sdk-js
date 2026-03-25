@@ -3,8 +3,7 @@ import { Address } from "../../key"
 import { LongString } from "../../types"
 import { CurrencyID } from "../../common"
 import { ContractFact, FactJson } from "../base"
-// import { Config } from "../../node"
-// import { Assert, ECODE, MitumError } from "../../error"
+import { concatBytes } from "../../utils/bytes"
 
 
 export class RegisterModelFact extends ContractFact {
@@ -23,11 +22,11 @@ export class RegisterModelFact extends ContractFact {
         this._hash = this.hashing()
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.didMethod.toBuffer(),
-            this.currency.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.didMethod.toBytes(),
+            this.currency.toBytes(),
         ])
     }
 

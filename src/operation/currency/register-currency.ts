@@ -1,7 +1,7 @@
 import { CurrencyDesign } from "./currency-design"
 import { NodeFact, FactJson } from "../base"
-
 import { HINT } from "../../alias"
+import { concatBytes } from "../../utils/bytes"
 
 export class RegisterCurrencyFact extends NodeFact {
     readonly design: CurrencyDesign
@@ -12,10 +12,10 @@ export class RegisterCurrencyFact extends NodeFact {
         this._hash = this.hashing()
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            this.token.toBuffer(),
-            this.design.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            this.token.toBytes(),
+            this.design.toBytes(),
         ])
     }
 

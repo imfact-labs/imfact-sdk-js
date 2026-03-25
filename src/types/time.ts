@@ -1,7 +1,7 @@
-import { IBuffer, IString } from "./interface"
+import { IBytes, IString } from "./interface"
 import { Assert, MitumError } from "../error"
 
-export class TimeStamp implements IBuffer, IString {
+export class TimeStamp implements IBytes, IString {
 	private t: Date
 
 	constructor(t?: string | number | Date) {
@@ -24,8 +24,8 @@ export class TimeStamp implements IBuffer, IString {
 		return t instanceof TimeStamp ? t : new TimeStamp(t)
 	}
 
-	toBuffer(): Buffer {
-		return Buffer.from(this.UTC())
+	toBytes(): Uint8Array {
+		return new TextEncoder().encode(this.UTC())
 	}
 
 	toString(): string {
@@ -102,8 +102,8 @@ export class FullTimeStamp extends TimeStamp {
 		return t instanceof FullTimeStamp ? t : new FullTimeStamp(t)
 	}
 
-	toBuffer(option?: "super"): Buffer {
-		return Buffer.from(option === "super" ? super.UTC() : this.UTC())
+	toBytes(option?: "super"): Uint8Array {
+		return new TextEncoder().encode(option === "super" ? super.UTC() : this.UTC())
 	}
 
 	ISO(): string {
