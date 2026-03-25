@@ -1,19 +1,17 @@
 import json from '@rollup/plugin-json';
 import typescript from 'rollup-plugin-typescript2';
-import nodePolyfills from 'rollup-plugin-polyfill-node';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 
 const commonPlugins = [
   resolve({
-    browser: true,
-    preferBuiltins: false,
+    browser: false,
+    preferBuiltins: true,
   }),
   commonjs({
     include: /node_modules/,
     requireReturnsDefault: 'auto',
   }),
-  nodePolyfills(),
   json(),
   typescript({
     tsconfig: './tsconfig.json',
@@ -40,7 +38,8 @@ export default [
       'big-integer',
       'int64-buffer',
       'ethers',
-      'buffer',
+      '@noble/secp256k1',
+      '@noble/hashes',
     ],
   },
   {
@@ -54,6 +53,8 @@ export default [
     external: [
       'axios',
       'ethers',
+      '@noble/secp256k1',
+      '@noble/hashes',
     ],
   },
 ];
