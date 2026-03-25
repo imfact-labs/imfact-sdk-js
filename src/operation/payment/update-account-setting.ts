@@ -1,4 +1,3 @@
-import { Buffer } from "buffer";
 import { FactJson } from "../base"
 import { PaymentFact } from "./fact"
 import { Big } from "../../types"
@@ -6,6 +5,7 @@ import { HINT } from "../../alias"
 import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
 import { Assert, ECODE, MitumError } from "../../error"
+import { concatBytes } from "../../utils/bytes"
 
 export class UpdateFact extends PaymentFact {
     readonly transfer_limit: Big;
@@ -42,14 +42,14 @@ export class UpdateFact extends PaymentFact {
         this._hash = this.hashing();
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.transfer_limit.toBuffer(),
-            this.start_time.toBuffer("fill"),
-            this.end_time.toBuffer("fill"),
-            this.duration.toBuffer("fill"),
-            this.currency.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.transfer_limit.toBytes(),
+            this.start_time.toBytes("fill"),
+            this.end_time.toBytes("fill"),
+            this.duration.toBytes("fill"),
+            this.currency.toBytes(),
         ])
     }
 

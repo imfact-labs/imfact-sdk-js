@@ -1,4 +1,3 @@
-import { Buffer } from "buffer";
 import { KYCItem } from "./item"
 import { OperationFact } from "../base"
 
@@ -7,6 +6,7 @@ import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
 import { Bool, HintedObject } from "../../types"
 import { Assert, ECODE, MitumError } from "../../error"
+import { concatBytes } from "../../utils/bytes"
 
 export class AddCustomerItem extends KYCItem {
     readonly customer: Address
@@ -29,12 +29,12 @@ export class AddCustomerItem extends KYCItem {
         )
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.customer.toBuffer(),
-            this.status.toBuffer(),
-            this.currency.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.customer.toBytes(),
+            this.status.toBytes(),
+            this.currency.toBytes(),
         ])
     }
 

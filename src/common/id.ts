@@ -1,26 +1,27 @@
 import { Config } from "../node/config"
-import type { IBuffer, IString } from "../types"
+import type { IBytes, IString } from "../types"
 import { Assert, ECODE, MitumError } from "../error"
-import { Buffer } from "buffer";
 
-abstract class ID implements IBuffer, IString {
-    private s: string
+const encoder = new TextEncoder();
 
-    constructor(s: string) {
-        this.s = s
-    }
+abstract class ID implements IBytes, IString {
+  private s: string
 
-    equal(id: ID): boolean {
-        return this.toString() === id.toString()
-    }
+  constructor(s: string) {
+    this.s = s
+  }
 
-    toBuffer(): Buffer {
-        return Buffer.from(this.s)
-    }
+  equal(id: ID): boolean {
+    return this.toString() === id.toString()
+  }
 
-    toString(): string {
-        return this.s
-    }
+  toBytes(): Uint8Array {
+    return encoder.encode(this.s)
+  }
+
+  toString(): string {
+    return this.s
+  }
 }
 
 export class CurrencyID extends ID {

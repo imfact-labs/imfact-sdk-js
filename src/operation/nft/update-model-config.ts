@@ -1,4 +1,3 @@
-import { Buffer } from "buffer";
 import { ContractFact, FactJson } from "../base"
 
 import { HINT } from "../../alias"
@@ -8,6 +7,7 @@ import { SortFunc } from "../../utils"
 import { CurrencyID } from "../../common"
 import { Big, LongString } from "../../types"
 import { Assert, ECODE, MitumError, ArrayAssert } from "../../error"
+import { concatBytes } from "../../utils/bytes"
 
 export class UpdateModelConfigFact extends ContractFact {
     readonly name: LongString
@@ -51,14 +51,14 @@ export class UpdateModelConfigFact extends ContractFact {
         this._hash = this.hashing()
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.name.toBuffer(),
-            this.royalty.toBuffer("fill"),
-            this.uri.toBuffer(),
-            this.currency.toBuffer(),
-            Buffer.concat(this.minterWhitelist.sort(SortFunc).map(w => w.toBuffer())),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.name.toBytes(),
+            this.royalty.toBytes("fill"),
+            this.uri.toBytes(),
+            this.currency.toBytes(),
+            concatBytes(this.minterWhitelist.sort(SortFunc).map(w => w.toBytes())),
         ])
     }
 

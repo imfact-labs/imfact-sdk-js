@@ -1,9 +1,9 @@
-import { Buffer } from "buffer";
 import { ContractFact, FactJson } from "../base"
 
 import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
 import { URIString } from "../../types"
+import { concatBytes } from "../../utils/bytes"
 
 export abstract class DAOFact extends ContractFact {
     readonly proposalID: URIString
@@ -20,10 +20,10 @@ export abstract class DAOFact extends ContractFact {
         this.proposalID = new URIString(proposalID, 'proposalID');
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.proposalID.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.proposalID.toBytes(),
         ])
     }
 

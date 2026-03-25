@@ -1,4 +1,3 @@
-import { Buffer } from "buffer";
 import { DAOFact } from "./fact"
 import { FactJson } from "../base"
 
@@ -8,6 +7,7 @@ import type { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
 import { Config } from "../../node"
 import { Assert, ECODE, MitumError } from "../../error"
+import { concatBytes } from "../../utils/bytes"
 
 export class VoteFact extends DAOFact {
     readonly vote: Big
@@ -29,11 +29,11 @@ export class VoteFact extends DAOFact {
         this._hash = this.hashing()
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-        super.toBuffer(),
-        this.vote.v === 0 ? Buffer.from([0x00]) : this.vote.toBuffer(),
-        this.currency.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.vote.v === 0 ? Uint8Array.from([0x00]) : this.vote.toBytes(),
+            this.currency.toBytes(),
         ])
     }
 

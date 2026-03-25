@@ -1,10 +1,10 @@
 import { Item } from "../base"
-import { Buffer } from "buffer";
 import { Config } from "../../node"
 import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
 import { HintedObject, URIString } from "../../types"
 import { Assert, ECODE, MitumError } from "../../error"
+import { concatBytes } from "../../utils/bytes"
 
 export abstract class CredentialItem extends Item {
     readonly contract: Address
@@ -45,12 +45,12 @@ export abstract class CredentialItem extends Item {
         )
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            this.contract.toBuffer(),
-            this.holder.toBuffer(),
-            this.templateID.toBuffer(),
-            this.credentialID.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            this.contract.toBytes(),
+            this.holder.toBytes(),
+            this.templateID.toBytes(),
+            this.credentialID.toBytes(),
         ])
     }
 

@@ -1,4 +1,3 @@
-import { Buffer } from "buffer";
 import { HINT } from "../../alias"
 import { Config } from "../../node"
 import { Address } from "../../key/address"
@@ -7,6 +6,7 @@ import { LongString, URIString } from "../../types"
 import { CurrencyID } from "../../common"
 import { Assert, ECODE, MitumError } from "../../error"
 import { Item, OperationFact } from "../base"
+import { concatBytes } from "../../utils/bytes"
 
 export class CreateDataItem extends Item {
     readonly contract: Address
@@ -32,12 +32,12 @@ export class CreateDataItem extends Item {
         )
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            this.contract.toBuffer(),
-            this.dataKey.toBuffer(),
-            this.dataValue.toBuffer(),
-            this.currency.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            this.contract.toBytes(),
+            this.dataKey.toBytes(),
+            this.dataValue.toBytes(),
+            this.currency.toBytes(),
         ])
     }
 

@@ -1,4 +1,3 @@
-import type { Buffer } from "buffer";
 import { Item } from "../base"
 
 import { Address } from "../../key/address"
@@ -20,8 +19,8 @@ export abstract class STOItem extends Item {
         this.currency = CurrencyID.from(currency)
     }
 
-    toBuffer(): Buffer {
-        return this.contract.toBuffer()
+    toBytes(): Uint8Array {
+        return this.contract.toBytes()
     }
 
     toHintedObject(): HintedObject {

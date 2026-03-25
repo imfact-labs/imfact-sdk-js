@@ -1,9 +1,11 @@
-import { Buffer } from "buffer";
 import { ContractFact, FactJson } from "../base"
 
 import { HINT } from "../../alias"
 import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
+import { concatBytes } from "../../utils/bytes"
+
+const encoder = new TextEncoder();
 
 export class SetDocumentFact extends ContractFact {
     readonly title: string
@@ -28,13 +30,13 @@ export class SetDocumentFact extends ContractFact {
         this._hash = this.hashing()
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            Buffer.from(this.title),
-            Buffer.from(this.uri),
-            Buffer.from(this.documentHash),
-            this.currency.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            encoder.encode(this.title),
+            encoder.encode(this.uri),
+            encoder.encode(this.documentHash),
+            this.currency.toBytes(),
         ])
     }
 

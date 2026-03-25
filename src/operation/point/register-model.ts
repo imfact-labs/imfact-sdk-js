@@ -1,4 +1,3 @@
-import { Buffer } from "buffer";
 import { PointFact } from "./fact"
 import { FactJson } from "../base"
 import { HINT } from "../../alias"
@@ -6,6 +5,7 @@ import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
 import { Big, LongString } from "../../types"
 import { Assert, ECODE, MitumError } from "../../error"
+import { concatBytes } from "../../utils/bytes"
 
 export class RegisterModelFact extends PointFact {
     readonly symbol: CurrencyID
@@ -40,13 +40,13 @@ export class RegisterModelFact extends PointFact {
         this._hash = this.hashing()
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.symbol.toBuffer(),
-            this.name.toBuffer(),
-            this.decimal.toBuffer(),
-            this.initialSupply.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.symbol.toBytes(),
+            this.name.toBytes(),
+            this.decimal.toBytes(),
+            this.initialSupply.toBytes(),
         ])
     }
 

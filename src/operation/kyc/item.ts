@@ -1,9 +1,9 @@
-import { Buffer } from "buffer";
 import { Item } from "../base"
 
 import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
 import { HintedObject } from "../../types"
+import { concatBytes } from "../../utils/bytes"
 
 export abstract class KYCItem extends Item {
     readonly contract: Address
@@ -20,8 +20,11 @@ export abstract class KYCItem extends Item {
         this.currency = CurrencyID.from(currency)
     }
 
-    toBuffer(): Buffer {
-        return this.contract.toBuffer()
+    toBytes(): Uint8Array {
+        return concatBytes([
+            this.contract.toBytes(),
+            this.currency.toBytes(),
+        ])
     }
 
     toHintedObject(): HintedObject {

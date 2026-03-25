@@ -1,6 +1,4 @@
 import base58 from "bs58"
-import { Buffer } from "buffer";
-
 import { CurrencyItem } from "./item"
 import { OperationFact } from "../base"
 
@@ -11,6 +9,7 @@ import { HintedObject } from "../../types"
 import { Keys } from "../../key/pub"
 import { Address } from "../../key/address"
 import { Assert, ECODE, MitumError } from "../../error"
+import { concatBytes } from "../../utils/bytes"
 
 export class CreateAccountItem extends CurrencyItem {
     readonly keys: Keys;
@@ -20,10 +19,10 @@ export class CreateAccountItem extends CurrencyItem {
         this.keys = keys
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            this.keys.toBuffer(),
-            Buffer.concat(this.amounts.sort(SortFunc).map(am => am.toBuffer())),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            this.keys.toBytes(),
+            concatBytes(this.amounts.sort(SortFunc).map(am => am.toBytes())),
         ])
     }
 
@@ -35,7 +34,7 @@ export class CreateAccountItem extends CurrencyItem {
     }
 
     toString(): string {
-        return base58.encode(this.keys.toBuffer())
+        return base58.encode(this.keys.toBytes())
     }
 }
 

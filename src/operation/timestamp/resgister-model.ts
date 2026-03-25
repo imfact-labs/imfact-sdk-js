@@ -1,10 +1,9 @@
-import { Buffer } from "buffer";
 import { TimeStampFact } from "./fact"
 
 import { HINT } from "../../alias"
 import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
-
+import { concatBytes } from "../../utils/bytes"
 
 export class RegisterModelFact extends TimeStampFact {
     constructor(
@@ -17,9 +16,9 @@ export class RegisterModelFact extends TimeStampFact {
         this._hash = this.hashing()
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
         ])
     }
 

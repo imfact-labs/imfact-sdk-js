@@ -1,12 +1,13 @@
-import { Buffer } from "buffer";
 import { ContractFact, FactJson } from "../base"
-
 import { HINT } from "../../alias"
 import { Config } from "../../node"
 import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
 import { Bool, ShortDate, URIString } from "../../types"
 import { Assert, ECODE, MitumError } from "../../error"
+import { concatBytes } from "../../utils/bytes"
+
+const encoder = new TextEncoder();
 
 export class AddTemplateFact extends ContractFact {
     readonly templateID: URIString
@@ -93,21 +94,21 @@ export class AddTemplateFact extends ContractFact {
         this._hash = this.hashing()
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.templateID.toBuffer(),
-            Buffer.from(this.templateName),
-            this.serviceDate.toBuffer(),
-            this.expirationDate.toBuffer(),
-            this.templateShare.toBuffer(),
-            this.multiAudit.toBuffer(),
-            Buffer.from(this.displayName),
-            Buffer.from(this.subjectKey),
-            Buffer.from(this.description),
-            this.creator.toBuffer(),
-            this.currency.toBuffer(),
-        ])
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.templateID.toBytes(),
+            encoder.encode(this.templateName),
+            this.serviceDate.toBytes(),
+            this.expirationDate.toBytes(),
+            this.templateShare.toBytes(),
+            this.multiAudit.toBytes(),
+            encoder.encode(this.displayName),
+            encoder.encode(this.subjectKey),
+            encoder.encode(this.description),
+            this.creator.toBytes(),
+            this.currency.toBytes(),
+        ]);
     }
 
     toHintedObject(): FactJson {

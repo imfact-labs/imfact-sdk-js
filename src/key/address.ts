@@ -2,12 +2,13 @@ import { AddressType } from "./types"
 import { SUFFIX } from "../alias"
 import { Config } from "../node/config"
 import { CurrencyID } from "../common"
-import { IBuffer, IString } from "../types"
+import { IBytes, IString } from "../types"
 import { ECODE, MitumError, StringAssert, Assert } from "../error"
 import { getChecksum } from "../utils/hash";
-import { Buffer } from "buffer";
 
-abstract class BaseAddress implements IBuffer, IString {
+const encoder = new TextEncoder();
+
+abstract class BaseAddress implements IBytes, IString {
     private s: string
     readonly type: AddressType
 
@@ -27,8 +28,8 @@ abstract class BaseAddress implements IBuffer, IString {
         }
     }
 
-    toBuffer(): Buffer {
-        return Buffer.from(this.s)
+    toBytes(): Uint8Array {
+        return encoder.encode(this.s)
     }
 
     toString(): string {

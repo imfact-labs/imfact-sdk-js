@@ -1,4 +1,3 @@
-import { Buffer } from "buffer";
 import { DAOFact } from "./fact"
 import { FactJson } from "../base"
 
@@ -7,6 +6,7 @@ import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
 import { BizProposal, CryptoProposal } from "./proposal"
 import { Assert, ECODE, MitumError } from "../../error"
+import { concatBytes } from "../../utils/bytes"
 
 export class ProposeFact extends DAOFact {
     readonly proposal: CryptoProposal | BizProposal
@@ -29,11 +29,11 @@ export class ProposeFact extends DAOFact {
         this._hash = this.hashing()
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.proposal.toBuffer(),
-            this.currency.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.proposal.toBytes(),
+            this.currency.toBytes(),
         ])
     }
 

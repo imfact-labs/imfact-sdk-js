@@ -1,8 +1,8 @@
-import { Buffer } from "buffer";
 import { ContractFact, FactJson } from "../base"
 
 import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
+import { concatBytes } from "../../utils/bytes"
 
 export abstract class PaymentFact extends ContractFact {
     protected constructor(
@@ -16,9 +16,9 @@ export abstract class PaymentFact extends ContractFact {
         // this._hash = this.hashing()
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
         ])
     }
 

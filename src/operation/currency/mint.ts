@@ -1,10 +1,9 @@
-import { Buffer } from "buffer";
 import { NodeFact, FactJson } from "../base"
 
 import { HINT } from "../../alias"
 import { Address } from "../../key/address"
 import type { Amount } from "../../common"
-
+import { concatBytes } from "../../utils/bytes"
 
 
 export class MintFact extends NodeFact {
@@ -18,11 +17,11 @@ export class MintFact extends NodeFact {
         this._hash = this.hashing()
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.receiver.toBuffer(),
-            this.amount.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.receiver.toBytes(),
+            this.amount.toBytes(),
         ])
     }
 

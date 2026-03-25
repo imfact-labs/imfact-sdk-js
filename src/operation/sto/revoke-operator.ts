@@ -1,4 +1,3 @@
-import { Buffer } from "buffer";
 import { STOItem } from "./item"
 import { Partition } from "./partition"
 import { OperationFact } from "../base"
@@ -8,6 +7,7 @@ import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
 import { HintedObject } from "../../types"
 import { Assert, ECODE, MitumError } from "../../error"
+import { concatBytes } from "../../utils/bytes"
 
 export class RevokeOperatorItem extends STOItem {
     readonly operator: Address
@@ -30,12 +30,12 @@ export class RevokeOperatorItem extends STOItem {
         )
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.operator.toBuffer(),
-            this.partition.toBuffer(),
-            this.currency.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.operator.toBytes(),
+            this.partition.toBytes(),
+            this.currency.toBytes(),
         ])
     }
 

@@ -1,4 +1,3 @@
-import { Buffer } from "buffer";
 import type { FactJson } from "../base"
 import { StorageFact } from "./fact"
 import type { LongString } from "../../types"
@@ -7,6 +6,7 @@ import { Config } from "../../node"
 import type { Address } from "../../key/address"
 import type { CurrencyID } from "../../common"
 import { Assert, ECODE, MitumError } from "../../error"
+import { concatBytes } from "../../utils/bytes"
 
 export class DeleteDataFact extends StorageFact {
     constructor(
@@ -26,10 +26,10 @@ export class DeleteDataFact extends StorageFact {
         this._hash = this.hashing()
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.currency.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.currency.toBytes(),
         ])
     }
 

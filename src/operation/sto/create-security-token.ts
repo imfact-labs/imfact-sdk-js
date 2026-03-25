@@ -1,4 +1,3 @@
-import { Buffer } from "buffer";
 import { STOItem } from "./item"
 import { Partition } from "./partition"
 import { OperationFact } from "../base"
@@ -8,6 +7,7 @@ import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
 import { Big, HintedObject } from "../../types"
 import { Assert, ECODE, MitumError } from "../../error"
+import { concatBytes } from "../../utils/bytes"
 
 export class CreateSecurityTokenItem extends STOItem {
     readonly granularity: Big
@@ -30,12 +30,12 @@ export class CreateSecurityTokenItem extends STOItem {
         )
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            this.contract.toBuffer(),
-            this.granularity.toBuffer("fill"),
-            this.defaultPartition.toBuffer(),
-            this.currency.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            this.contract.toBytes(),
+            this.granularity.toBytes("fill"),
+            this.defaultPartition.toBytes(),
+            this.currency.toBytes(),
         ])
     }
 

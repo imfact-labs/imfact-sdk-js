@@ -1,8 +1,9 @@
-import { IBuffer, IString } from "../types"
+import { IBytes, IString } from "../types"
 import { Assert, ECODE, MitumError } from "../error"
-import { Buffer } from "buffer";
 
-export class LongString implements IBuffer, IString {
+const encoder = new TextEncoder();
+
+export class LongString implements IBytes, IString {
     private s: string
 
     constructor(s: string) {
@@ -15,8 +16,8 @@ export class LongString implements IBuffer, IString {
         return s instanceof LongString ? s : new LongString(s)
     }
 
-    toBuffer(): Buffer {
-        return Buffer.from(this.s)
+    toBytes(): Uint8Array {
+        return encoder.encode(this.s)
     }
 
     toString(): string {
@@ -54,7 +55,7 @@ export class IP extends LongString {
     }
 }
 
-export class URIString implements IBuffer, IString {
+export class URIString implements IBytes, IString {
     private s: string
 
     constructor(s: string, name: string) {
@@ -65,8 +66,8 @@ export class URIString implements IBuffer, IString {
         this.s = s
     }
 
-    toBuffer(): Buffer {
-        return Buffer.from(this.s)
+    toBytes(): Uint8Array {
+        return encoder.encode(this.s)
     }
 
     toString(): string {

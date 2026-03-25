@@ -1,4 +1,3 @@
-import { Buffer } from "buffer";
 import { SignOption, Fact } from "./base"
 import type { BaseOperation } from "./base/operation"
 import { getAPIData } from "../api/getAPIData"
@@ -112,18 +111,23 @@ export class Operation extends Generator {
 
 	/**
 	 * Sign the given operation using the provided private key or key pair.
-	 * @param {string | Key | KeyPair} [privatekey] - The private key or key pair for signing.
-	 * @param {OP<Fact>} [operation] - The operation to sign.
+	 * @param {string | Key | KeyPair} privatekey - The private key or key pair for signing.
+	 * @param {OP<Fact>} operation - The operation to sign.
 	 * @param {SignOption} [option] - (Optional) Option for node sign.
-	 * @returns The signed operation.
+	 * @returns {Promise<OP<Fact>>} A Promise that resolves to the signed operation.
 	 */
-	sign(
+	async sign(
 		privatekey: string | Key | KeyPair,
 		operation: BaseOperation<Fact>,
 		option?: SignOption,
-	) {
-		const op = operation;
-		op.sign(privatekey instanceof KeyPair ? privatekey.privateKey : privatekey, option)
+	): Promise<BaseOperation<Fact>> {
+		const op = operation
+
+		await op.sign(
+			privatekey instanceof KeyPair ? privatekey.privateKey : privatekey,
+			option
+	)
+
 		return op
 	}
 
@@ -162,7 +166,7 @@ export class Operation extends Generator {
 			MitumError.detail(ECODE.EMPTY_SIGN, `signature is required before sending the operation`)
 		)
 		Assert.check(
-			Config.OP_SIZE.satisfy(Buffer.byteLength(JSON.stringify(operation), 'utf8')),
+			Config.OP_SIZE.satisfy(new TextEncoder().encode(JSON.stringify(operation)).length),
 			MitumError.detail(ECODE.OP_SIZE_EXCEEDED, `Operation size exceeds the allowed limit of ${Config.OP_SIZE.max} bytes.`)
 		)
 

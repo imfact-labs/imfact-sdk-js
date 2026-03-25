@@ -1,9 +1,9 @@
-import { Buffer } from "buffer";
 import { Item } from "../base"
 import { Big } from "../../types"
 import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
 import { HintedObject } from "../../types"
+import { concatBytes } from "../../utils/bytes"
 
 export abstract class PointItem extends Item {
     readonly contract: Address
@@ -18,8 +18,10 @@ export abstract class PointItem extends Item {
         this.currency = CurrencyID.from(currency)
     }
 
-    toBuffer(): Buffer {
-        return this.contract.toBuffer()
+    toBytes(): Uint8Array {
+        return concatBytes([
+            this.contract.toBytes(),
+        ])
     }
 
     toHintedObject(): HintedObject {

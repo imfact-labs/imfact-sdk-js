@@ -1,4 +1,3 @@
-import { Buffer } from "buffer";
 import { OperationFact } from "../base"
 import { CredentialItem } from "./item"
 
@@ -8,7 +7,9 @@ import type { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
 import { Assert, ECODE, MitumError } from "../../error"
 import { Big, HintedObject } from "../../types"
+import { concatBytes } from "../../utils/bytes"
 
+const encoder = new TextEncoder();
 export class IssueItem extends CredentialItem {
     readonly value: string
     readonly validFrom: Big
@@ -44,14 +45,14 @@ export class IssueItem extends CredentialItem {
         )
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            Buffer.from(this.value),
-            this.validFrom.toBuffer("fill"),
-            this.validUntil.toBuffer("fill"),
-            Buffer.from(this.did),
-            this.currency.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            encoder.encode(this.value),
+            this.validFrom.toBytes(),
+            this.validUntil.toBytes(),
+            encoder.encode(this.did),
+            this.currency.toBytes(),
         ])
     }
 

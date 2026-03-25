@@ -1,8 +1,8 @@
-import { Buffer } from "buffer";
 import { HINT } from "../../alias"
 import { Address } from "../../key/address"
 import { ContractFact } from "../base"
 import { CurrencyID } from "../../common"
+import { concatBytes } from "../../utils/bytes"
 
 export class RegisterModelFact extends ContractFact {
     constructor(
@@ -15,10 +15,10 @@ export class RegisterModelFact extends ContractFact {
         this._hash = this.hashing()
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.currency.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.currency.toBytes(),
         ])
     }
 

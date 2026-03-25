@@ -439,7 +439,7 @@ export class NFT extends ContractGenerator {
      * @param {string | Address} [sender] - The address of the creator signing the NFT.
      * @param {string | number | Big} [nftIdx] - The index of the NFT (Indicate the order of minted).
      * @param {string | CurrencyID} [currency] - The currency ID.
-     * @returns `sign` operation.
+     * @returns add-signature operation
      */
     addSignature(
         contract: string | Address,

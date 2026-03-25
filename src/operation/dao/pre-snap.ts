@@ -1,9 +1,9 @@
-import { Buffer } from "buffer";
 import { DAOFact } from "./fact"
 
 import { HINT } from "../../alias"
 import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
+import { concatBytes } from "../../utils/bytes"
 
 export class PreSnapFact extends DAOFact {
     constructor(
@@ -17,10 +17,10 @@ export class PreSnapFact extends DAOFact {
         this._hash = this.hashing()
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.currency.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.currency.toBytes(),
         ])
     }
 

@@ -1,4 +1,3 @@
-import type { Buffer } from "buffer";
 import { Item } from "../base"
 import { Big } from "../../types"
 import { Address } from "../../key/address"
@@ -18,8 +17,8 @@ export abstract class TokenItem extends Item {
         this.currency = CurrencyID.from(currency)
     }
 
-    toBuffer(): Buffer {
-        return this.contract.toBuffer()
+    toBytes(): Uint8Array {
+        return this.contract.toBytes()
     }
 
     toHintedObject(): HintedObject {

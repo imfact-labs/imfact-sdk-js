@@ -1,9 +1,9 @@
-import { Buffer } from "buffer";
 import { ContractFact, FactJson } from "../base"
 
 import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
 import { LongString } from "../../types"
+import { concatBytes } from "../../utils/bytes"
 
 export abstract class StorageFact extends ContractFact {
     readonly dataKey: LongString
@@ -24,10 +24,10 @@ export abstract class StorageFact extends ContractFact {
         // )
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.dataKey.toBuffer()
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.dataKey.toBytes()
         ])
     }
 

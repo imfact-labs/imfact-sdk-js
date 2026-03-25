@@ -1,10 +1,12 @@
-import { Buffer } from "buffer";
 import { ContractFact, FactJson } from "../base"
 import { HINT } from "../../alias"
 import { Address } from "../../key/address"
 import { CurrencyID, Hint } from "../../common"
 import { DAOPolicy } from "./policy"
 import { Assert, ECODE, MitumError } from "../../error"
+import { concatBytes } from "../../utils/bytes"
+
+const encoder = new TextEncoder();
 
 export class RegisterModelFact extends ContractFact {
     readonly option: "crypto" | "biz"
@@ -33,12 +35,12 @@ export class RegisterModelFact extends ContractFact {
         this._hash = this.hashing()
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            Buffer.from(this.option),
-            this.policy.toBuffer(),
-            this.currency.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            encoder.encode(this.option),
+            this.policy.toBytes(),
+            this.currency.toBytes(),
         ])
     }
 

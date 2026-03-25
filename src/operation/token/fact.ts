@@ -1,8 +1,8 @@
-import { Buffer } from "buffer";
 import { ContractFact } from "../base"
 import type { FactJson } from "../base"
 import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
+import { concatBytes } from "../../utils/bytes"
 
 export abstract class TokenFact extends ContractFact {
     protected constructor(
@@ -15,10 +15,10 @@ export abstract class TokenFact extends ContractFact {
         super(hint, token, sender, contract, currency)
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.currency.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.currency.toBytes(),
         ])
     }
 

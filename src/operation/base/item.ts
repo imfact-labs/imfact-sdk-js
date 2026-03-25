@@ -1,15 +1,14 @@
 import { Hint } from "../../common"
-import type { Buffer } from "buffer";
-import { HintedObject, IBuffer, IHintedObject, IString } from "../../types"
+import { HintedObject, IBytes, IHintedObject, IString } from "../../types"
 
-export abstract class Item implements IBuffer, IString, IHintedObject {
+export abstract class Item implements IBytes, IString, IHintedObject {
     private hint: Hint
     
     protected constructor(hint: string) {
         this.hint = new Hint(hint)
     }
 
-    abstract toBuffer(): Buffer
+    abstract toBytes(): Uint8Array
     abstract toString(): string
     
     toHintedObject(): HintedObject {

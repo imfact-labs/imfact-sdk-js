@@ -1,27 +1,28 @@
 import base58 from "bs58"
-import { Buffer } from "buffer";
 
 import { Fact } from "./fact"
-import { SignOption } from "./types"
+import { OperationJson, SignOption } from "./types"
 import { GeneralFactSign, NodeFactSign } from "./factsign"
-
 import { Hint } from "../../common"
 import { SortFunc, sha3 } from "../../utils"
+import { concatBytes } from "../../utils/bytes"
 import { Assert, ECODE, MitumError } from "../../error"
 import { Address, NodeAddress } from "../../key/address"
 import { Key } from "../../key/pub"
 import { KeyPair } from "../../key/keypair"
-import { HintedObject, IBuffer, IHintedObject, TimeStamp } from "../../types"
+import { IBytes, IHintedObject, TimeStamp } from "../../types"
 
 type FactSign = GeneralFactSign | NodeFactSign
 type SigType = "FactSign" | "NodeFactSign" | null
 
-export class BaseOperation<T extends Fact> implements IBuffer, IHintedObject {
+const encoder = new TextEncoder();
+
+export class BaseOperation<T extends Fact> implements IBytes, IHintedObject {
     readonly id: string
     readonly hint: Hint
     readonly fact: T
     protected _factSigns: FactSign[]
-    protected _hash: Buffer
+    protected _hash: Uint8Array
 
     constructor(networkID: string, fact: T) {
         this.id = networkID
@@ -29,7 +30,7 @@ export class BaseOperation<T extends Fact> implements IBuffer, IHintedObject {
 
         this.hint = new Hint(fact.operationHint)
         this._factSigns = []
-        this._hash = Buffer.from([])
+        this._hash = new Uint8Array()
     }
 
     setFactSigns(factSigns: FactSign[]) {
@@ -73,30 +74,30 @@ export class BaseOperation<T extends Fact> implements IBuffer, IHintedObject {
         return Array.from(set)[0]
     }
 
-    hashing(force?: "force") {
-        let b: Buffer = sha3(this.toBuffer())
+    hashing(force?: "force"): Uint8Array {
+        const b = sha3(this.toBytes())
 
-        if (force && force === "force") {
+        if (force === "force") {
             this._hash = b
         }
 
         return b
     }
 
-    sign(privateKey: string | Key, option?: SignOption) {
-        privateKey = Key.from(privateKey)
-        const keypair = KeyPair.fromPrivateKey<KeyPair>(privateKey)
+    async sign(privateKey: string | Key, option?: SignOption): Promise<void> {
+        const key = Key.from(privateKey)
+        const keypair = KeyPair.fromPrivateKey<KeyPair>(key)
+
         const sigType = this.factSignType
 
         if (sigType === "NodeFactSign") {
             Assert.check(option !== undefined, MitumError.detail(ECODE.FAIL_SIGN, "no node address in sign option"))
         }
 
-        const factSign = this.signWithSigType(sigType, keypair, option ? new NodeAddress(option.node ?? "") : undefined)
-
-        const idx = this._factSigns
-            .map((fs) => fs.signer.toString())
-            .indexOf(keypair.publicKey.toString())
+        const node = option ? new NodeAddress(option.node ?? "") : undefined
+        const factSign = await this.signWithSigType(sigType, keypair, node)
+        const signer = keypair.publicKey.toString()
+        const idx = this._factSigns.findIndex(fs => fs.signer.toString() === signer)
 
         if (idx < 0) {
             this._factSigns.push(factSign)
@@ -104,72 +105,55 @@ export class BaseOperation<T extends Fact> implements IBuffer, IHintedObject {
             this._factSigns[idx] = factSign
         }
 
-        this._hash = this.hashing()
+        this._hash = this.hashing("force")
     }
 
-    private signWithSigType(sigType: SigType, keypair: KeyPair, node: Address | undefined) {
-        const getFactSign = (keypair: KeyPair, hash: Buffer) => {
-            const now = TimeStamp.new()
+    private async signWithSigType(sigType: SigType, keypair: KeyPair, node?: Address): Promise<FactSign> {
+        const now = TimeStamp.new()
 
-            return new GeneralFactSign(
-                keypair.publicKey,
-                keypair.sign(Buffer.concat([Buffer.from(this.id), hash, now.toBuffer()])),
-                now.toString(),
-            )
-        }
-        const getNodeFactSign = (node: Address, keypair: KeyPair, hash: Buffer) => {
-            const now = TimeStamp.new()
+        if (sigType === "NodeFactSign" || (!sigType && node)) {
+            Assert.check(node !== undefined, MitumError.detail(ECODE.FAIL_SIGN, "no node address"))
+
+            const sig = await keypair.sign(concatBytes([encoder.encode(this.id), node!.toBytes(), this.fact.hash, now.toBytes()]))
 
             return new NodeFactSign(
-                node.toString(),
+                node!.toString(),
                 keypair.publicKey,
-                keypair.sign(Buffer.concat([
-                    Buffer.from(this.id),
-                    node.toBuffer(),
-                    hash,
-                    now.toBuffer(),
-                ])),
-                now.toString(),
+                sig,
+                now.toString()
             )
         }
 
-        const hash = this.fact.hash;
+        const sig = await keypair.sign(concatBytes([encoder.encode(this.id), this.fact.hash, now.toBytes()]))
 
-        if (sigType) {
-            if (sigType == "NodeFactSign") {
-                Assert.check(node !== undefined, MitumError.detail(ECODE.FAIL_SIGN, "no node address"))
-                return getNodeFactSign(node as Address, keypair, hash)
-            }
-            return getFactSign(keypair, hash)
-        } else {
-            if (node) {
-                return getNodeFactSign(node, keypair, hash)
-            }
-            return getFactSign(keypair, hash)
-        }
+        return new GeneralFactSign(
+            keypair.publicKey,
+            sig,
+            now.toString()
+        )
     }
 
-    toBuffer(): Buffer {
-        if (!this._factSigns) {
+    toBytes(): Uint8Array {
+        if (this._factSigns.length === 0) {
             return this.fact.hash
         }
 
-        this._factSigns = this._factSigns.sort(SortFunc)
+        const sorted = [...this._factSigns].sort(SortFunc)
 
-        return Buffer.concat([
+        return concatBytes([
             this.fact.hash,
-            Buffer.concat(this._factSigns.map((fs) => fs.toBuffer())),
+            concatBytes(sorted.map(fs => fs.toBytes())),
         ])
     }
 
-    toHintedObject(): HintedObject {
+    toHintedObject(): OperationJson {
         const operation = {
             _hint: this.hint.toString(),
             fact: this.fact.toHintedObject(),
             hash: this._hash.length === 0 ? "" : base58.encode(this._hash)
         }
 
-        const factSigns = this._factSigns.length === 0 ? [] : this._factSigns.sort(SortFunc)
+        const factSigns = this._factSigns.length === 0 ? [] : [...this._factSigns].sort(SortFunc)
 
         return {
             ...operation,

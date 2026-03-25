@@ -1,4 +1,3 @@
-import { Buffer } from "buffer";
 import { HINT } from "../../alias"
 import { Hint } from "../../common"
 import { Config } from "../../node"
@@ -6,10 +5,10 @@ import { Address } from "../../key/address"
 import { SortFunc } from "../../utils"
 import { Assert, ECODE, MitumError } from "../../error"
 import { Big, Bool } from "../../types"
-import type { HintedObject, IBuffer, IHintedObject } from "../../types"
+import type { HintedObject, IBytes, IHintedObject } from "../../types"
+import { concatBytes } from "../../utils/bytes"
 
-
-export class Signer implements IBuffer, IHintedObject {
+export class Signer implements IBytes, IHintedObject {
     readonly hint: Hint
     readonly account: Address
     readonly share: Big
@@ -28,11 +27,11 @@ export class Signer implements IBuffer, IHintedObject {
         )
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            this.account.toBuffer(),
-            this.share.toBuffer("fill"),
-            this.signed.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            this.account.toBytes(),
+            this.share.toBytes("fill"),
+            this.signed.toBytes(),
         ])
     }
 
@@ -46,7 +45,7 @@ export class Signer implements IBuffer, IHintedObject {
     }
 }
 
-export class Signers implements IBuffer, IHintedObject {
+export class Signers implements IBytes, IHintedObject {
     readonly hint: Hint
     readonly signers: Signer[]
 
@@ -67,9 +66,9 @@ export class Signers implements IBuffer, IHintedObject {
         )
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            Buffer.concat(this.signers.sort(SortFunc).map(s => s.toBuffer())),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            concatBytes(this.signers.sort(SortFunc).map(s => s.toBytes())),
         ])
     }
 

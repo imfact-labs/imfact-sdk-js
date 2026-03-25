@@ -1,4 +1,3 @@
-import { Buffer } from "buffer";
 import { HINT } from "../../alias"
 import type { Address } from "../../key/address"
 import { LongString } from "../../types"
@@ -6,6 +5,7 @@ import type { CurrencyID } from "../../common"
 import { ContractFact, FactJson } from "../base"
 import { Config } from "../../node"
 import { Assert, ECODE, MitumError } from "../../error"
+import { concatBytes } from "../../utils/bytes"
 
 export class RegisterModelFact extends ContractFact {
     readonly project: LongString
@@ -27,11 +27,11 @@ export class RegisterModelFact extends ContractFact {
         this._hash = this.hashing()
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.project.toBuffer(),
-            this.currency.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.project.toBytes(),
+            this.currency.toBytes(),
         ])
     }
 

@@ -1,24 +1,26 @@
-import { IBuffer, IString } from "../types"
+import { IBytes, IString } from "../types"
 import { Assert, ECODE, MitumError } from "../error"
-import { Buffer } from "buffer";
+import { bytesToBase64 } from "../utils/base64"
 
-export class Token implements IBuffer, IString {
-    private s: string
+const encoder = new TextEncoder();
 
-    constructor(s: string) {
-        Assert.check(s !== "", MitumError.detail(ECODE.INVALID_TOKEN, "empty token"))
-        this.s = s
-    }
+export class Token implements IBytes, IString {
+  private s: string
 
-    static from(s: string | Token) {
-        return s instanceof Token ? s : new Token(s)
-    }
+  constructor(s: string) {
+    Assert.check(s !== "", MitumError.detail(ECODE.INVALID_TOKEN, "empty token"))
+    this.s = s
+  }
 
-    toBuffer(): Buffer {
-        return Buffer.from(this.s)
-    }
+  static from(s: string | Token) {
+    return s instanceof Token ? s : new Token(s)
+  }
 
-    toString(): string {
-        return Buffer.from(this.s, "utf8").toString("base64")
-    }
+  toBytes(): Uint8Array {
+    return encoder.encode(this.s)
+  }
+
+  toString(): string {
+    return bytesToBase64(this.toBytes())
+  }
 }

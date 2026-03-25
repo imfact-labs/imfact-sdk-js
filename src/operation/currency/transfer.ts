@@ -1,4 +1,3 @@
-import { Buffer } from "buffer";
 import { CurrencyItem } from "./item"
 import { OperationFact } from "../base"
 
@@ -8,6 +7,7 @@ import { HintedObject } from "../../types"
 import { HINT, SUFFIX } from "../../alias"
 import { Address, ZeroAddress } from "../../key/address"
 import { Assert, ECODE, MitumError } from "../../error"
+import { concatBytes } from "../../utils/bytes"
 
 export class TransferItem extends CurrencyItem {
     readonly receiver: Address | ZeroAddress
@@ -35,10 +35,10 @@ export class TransferItem extends CurrencyItem {
         }
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            this.receiver.toBuffer(),
-            Buffer.concat(this.amounts.sort(SortFunc).map(am => am.toBuffer())),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            this.receiver.toBytes(),
+            concatBytes(this.amounts.sort(SortFunc).map(am => am.toBytes())),
         ])
     }
 

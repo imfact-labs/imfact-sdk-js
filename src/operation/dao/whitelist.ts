@@ -1,4 +1,3 @@
-import { Buffer } from "buffer";
 import { HINT } from "../../alias"
 import { Hint } from "../../common"
 import { Config } from "../../node"
@@ -6,9 +5,10 @@ import { Address } from "../../key/address"
 import { ArrayAssert } from "../../error"
 import { SortFunc } from "../../utils"
 import { Bool } from "../../types"
-import type { HintedObject, IBuffer, IHintedObject } from "../../types"
+import type { HintedObject, IBytes, IHintedObject } from "../../types"
+import { concatBytes } from "../../utils/bytes"
 
-export class Whitelist implements IBuffer, IHintedObject {
+export class Whitelist implements IBytes, IHintedObject {
     private hint: Hint
     readonly active: Bool
     readonly accounts: Address[]
@@ -21,10 +21,10 @@ export class Whitelist implements IBuffer, IHintedObject {
         ArrayAssert.check(accounts, "whitelist").rangeLength(Config.DAO.ADDRESS_IN_WHITELIST).noDuplicates()
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            this.active.toBuffer(),
-            Buffer.concat(this.accounts.sort(SortFunc).map(a => a.toBuffer())),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            this.active.toBytes(),
+            concatBytes(this.accounts.sort(SortFunc).map(a => a.toBytes())),
         ])
     }
 

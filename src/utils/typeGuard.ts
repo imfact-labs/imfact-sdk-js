@@ -2,7 +2,6 @@ import type { BaseOperation } from "../operation/base/operation"
 import type { Fact } from "../operation/base/fact"
 import { ErrorResponse, SuccessResponse, HintedObject } from "../types"
 import { Hint } from "../common/hint"
-import { Buffer } from "buffer";
 
 export const isOpFact = (operation: any): operation is BaseOperation<Fact> => {
   if (typeof operation !== "object" || operation === null) return false;
@@ -30,9 +29,7 @@ export const isOpFact = (operation: any): operation is BaseOperation<Fact> => {
     operation.fact.hint instanceof Hint
 
   const isFactSignsValid = Array.isArray(operation._factSigns);
-  const isHashValid =
-    operation._hash instanceof Uint8Array ||
-    (typeof Buffer !== "undefined" && Buffer.isBuffer?.(operation._hash));
+  const isHashValid = operation._hash instanceof Uint8Array
 
   return (
     isIdValid &&

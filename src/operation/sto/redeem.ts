@@ -1,4 +1,3 @@
-import { Buffer } from "buffer";
 import { STOItem } from "./item"
 import { Partition } from "./partition"
 import { OperationFact } from "../base"
@@ -8,6 +7,7 @@ import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
 import { Big, HintedObject } from "../../types"
 import { Assert, ECODE, MitumError } from "../../error"
+import { concatBytes } from "../../utils/bytes"
 
 export class RedeemItem extends STOItem {
     readonly tokenHolder: Address
@@ -38,13 +38,13 @@ export class RedeemItem extends STOItem {
         )
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.tokenHolder.toBuffer(),
-            this.amount.toBuffer(),
-            this.partition.toBuffer(),
-            this.currency.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.tokenHolder.toBytes(),
+            this.amount.toBytes(),
+            this.partition.toBytes(),
+            this.currency.toBytes(),
         ])
     }
 

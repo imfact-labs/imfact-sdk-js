@@ -1,4 +1,3 @@
-import { Buffer } from "buffer";
 import { PointFact } from "./fact"
 import { FactJson } from "../base"
 
@@ -7,6 +6,7 @@ import { HINT } from "../../alias"
 import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
 import { Assert, ECODE, MitumError } from "../../error"
+import { concatBytes } from "../../utils/bytes"
 
 export class BurnFact extends PointFact {
     readonly target: Address
@@ -37,11 +37,11 @@ export class BurnFact extends PointFact {
         this._hash = this.hashing()
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.target.toBuffer(),
-            this.amount.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.target.toBytes(),
+            this.amount.toBytes(),
         ])
     }
 

@@ -1,22 +1,22 @@
-import { Buffer } from "buffer";
 import { DAOPolicy } from "./policy"
 
 import { HINT } from "../../alias"
 import { Address } from "../../key/address"
 import { Amount, Hint } from "../../common"
-import { Big, HintedObject, IBuffer, IHintedObject, LongString } from "../../types"
+import { Big, HintedObject, IBytes, IHintedObject, LongString } from "../../types"
 import { Config } from "../../node"
 import { Assert, ECODE, MitumError } from "../../error"
+import { concatBytes } from "../../utils/bytes"
 
-abstract class Calldata implements IBuffer, IHintedObject {
+abstract class Calldata implements IBytes, IHintedObject {
     private hint: Hint
 
     constructor(hint: string) {
         this.hint = new Hint(hint)
     }
 
-    toBuffer(): Buffer {
-        return Buffer.from([])
+    toBytes(): Uint8Array {
+        return new Uint8Array()
     }
 
     toHintedObject(): HintedObject {
@@ -38,12 +38,12 @@ export class TransferCalldata extends Calldata {
         this.amount = amount
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.sender.toBuffer(),
-            this.receiver.toBuffer(),
-            this.amount.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.sender.toBytes(),
+            this.receiver.toBytes(),
+            this.amount.toBytes(),
         ])
     }
 
@@ -65,10 +65,10 @@ export class GovernanceCalldata extends Calldata {
         this.policy = policy
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.policy.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.policy.toBytes(),
         ])
     }
 
@@ -80,7 +80,7 @@ export class GovernanceCalldata extends Calldata {
     }
 }
 
-abstract class Proposal implements IBuffer, IHintedObject {
+abstract class Proposal implements IBytes, IHintedObject {
     private hint: Hint
     readonly proposer: Address
     readonly startTime: Big
@@ -91,10 +91,10 @@ abstract class Proposal implements IBuffer, IHintedObject {
         this.startTime = Big.from(startTime)
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            this.proposer.toBuffer(),
-            this.startTime.toBuffer("fill"),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            this.proposer.toBytes(),
+            this.startTime.toBytes("fill"),
         ])
     }
 
@@ -115,10 +115,10 @@ export class CryptoProposal extends Proposal {
         this.calldata = calldata
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.calldata.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.calldata.toBytes(),
         ])
     }
 
@@ -154,12 +154,12 @@ export class BizProposal extends Proposal {
         )
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.url.toBuffer(),
-            this.hash.toBuffer(),
-            this.options.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.url.toBytes(),
+            this.hash.toBytes(),
+            this.options.toBytes(),
         ])
     }
 

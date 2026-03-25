@@ -1,62 +1,70 @@
 import { Hint } from "./hint"
 import { CurrencyID } from "./id"
-import { Buffer } from "buffer";
+import { concatBytes } from "../utils/bytes"
 import { HINT } from "../alias"
 import { Assert, ECODE, MitumError } from "../error"
-import { Big, HintedObject, IBuffer, IHintedObject } from "../types"
+import { Big, HintedObject, IBytes, IHintedObject } from "../types"
 
-export class Amount implements IBuffer, IHintedObject {
-    private hint: Hint
-    readonly currency: CurrencyID
-    readonly big: Big
+export class Amount implements IBytes, IHintedObject {
+  private hint: Hint
+  readonly currency: CurrencyID
+  readonly big: Big
 
-    constructor(currency: string | CurrencyID, big: string | number | Big) {
-        this.hint = new Hint(HINT.CURRENCY.AMOUNT)
-        this.currency = CurrencyID.from(currency)
-        this.big = Big.from(big)
-        Assert.check(this.big.big > 0, MitumError.detail(ECODE.INVALID_AMOUNT, "amount must be over zero"))
+  constructor(currency: string | CurrencyID, big: string | number | Big) {
+    this.hint = new Hint(HINT.CURRENCY.AMOUNT)
+    this.currency = CurrencyID.from(currency)
+    this.big = Big.from(big)
+
+    Assert.check(
+      this.big.big > 0,
+      MitumError.detail(ECODE.INVALID_AMOUNT, "amount must be over zero")
+    )
+  }
+
+  toBytes(): Uint8Array {
+    return concatBytes([
+      this.big.toBytes(),
+      this.currency.toBytes(),
+    ])
+  }
+
+  toHintedObject(): HintedObject {
+    return {
+      _hint: this.hint.toString(),
+      currency: this.currency.toString(),
+      amount: this.big.toString(),
     }
-
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            this.big.toBuffer(),
-            this.currency.toBuffer(),
-        ])
-    }
-
-    toHintedObject(): HintedObject {
-        return {
-            _hint: this.hint.toString(),
-            currency: this.currency.toString(),
-            amount: this.big.toString(),
-        }
-    }
+  }
 }
 
-export class Fee implements IBuffer, IHintedObject {
-    private hint: Hint
-    readonly currency: CurrencyID
-    readonly big: Big
+export class Fee implements IBytes, IHintedObject {
+  private hint: Hint
+  readonly currency: CurrencyID
+  readonly big: Big
 
-    constructor(currency: string | CurrencyID, big: string | number | Big) {
-        this.hint = new Hint(HINT.CURRENCY.AMOUNT)
-        this.currency = CurrencyID.from(currency)
-        this.big = Big.from(big)
-        Assert.check(0 <= this.big.big, MitumError.detail(ECODE.INVALID_FACT, "fee must not be under zero"))
-    }
+  constructor(currency: string | CurrencyID, big: string | number | Big) {
+    this.hint = new Hint(HINT.CURRENCY.AMOUNT)
+    this.currency = CurrencyID.from(currency)
+    this.big = Big.from(big)
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            this.big.toBuffer(),
-            this.currency.toBuffer(),
-        ])
-    }
+    Assert.check(
+      0 <= this.big.big,
+      MitumError.detail(ECODE.INVALID_FACT, "fee must not be under zero")
+    )
+  }
 
-    toHintedObject(): HintedObject {
-        return {
-            _hint: this.hint.toString(),
-            currency: this.currency.toString(),
-            amount: this.big.toString(),
-        }
+  toBytes(): Uint8Array {
+    return concatBytes([
+      this.big.toBytes(),
+      this.currency.toBytes(),
+    ])
+  }
+
+  toHintedObject(): HintedObject {
+    return {
+      _hint: this.hint.toString(),
+      currency: this.currency.toString(),
+      amount: this.big.toString(),
     }
+  }
 }

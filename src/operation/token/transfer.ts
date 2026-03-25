@@ -1,4 +1,3 @@
-import { Buffer } from "buffer";
 import { TokenItem } from "./item"
 import { OperationFact } from "../base"
 
@@ -7,6 +6,7 @@ import { HINT } from "../../alias"
 import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
 import { Assert, ECODE, MitumError } from "../../error"
+import { concatBytes } from "../../utils/bytes"
 
 export class TransferItem extends TokenItem {
     readonly receiver: Address
@@ -22,12 +22,12 @@ export class TransferItem extends TokenItem {
         this.receiver = Address.from(receiver);
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.receiver.toBuffer(),
-            this.amount.toBuffer(),
-            this.currency.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.receiver.toBytes(),
+            this.amount.toBytes(),
+            this.currency.toBytes(),
         ])
     }
 

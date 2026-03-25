@@ -1,4 +1,3 @@
-import { Buffer } from "buffer";
 import { NFTItem } from "./item"
 import { OperationFact } from "../base"
 
@@ -7,6 +6,7 @@ import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
 import { Big, HintedObject } from "../../types"
 import { Assert, ECODE, MitumError } from "../../error"
+import { concatBytes } from "../../utils/bytes"
 
 export class AddSignatureItem extends NFTItem {
     readonly nftIdx: Big
@@ -20,11 +20,11 @@ export class AddSignatureItem extends NFTItem {
         this.nftIdx = Big.from(nftIdx)
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.nftIdx.toBuffer("fill"),
-            this.currency.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.nftIdx.toBytes("fill"),
+            this.currency.toBytes(),
         ])
     }
 

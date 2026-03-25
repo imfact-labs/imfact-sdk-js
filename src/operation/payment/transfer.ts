@@ -1,10 +1,10 @@
-import { Buffer } from "buffer";
 import { PaymentFact } from "./fact"
 import { FactJson } from "../base"
 import { HINT } from "../../alias"
 import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
 import { Big } from "../../types"
+import { concatBytes } from "../../utils/bytes"
 
 export class TransferFact extends PaymentFact {
     readonly amount: Big;
@@ -25,12 +25,12 @@ export class TransferFact extends PaymentFact {
         this._hash = this.hashing();
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.receiver.toBuffer(),
-            this.amount.toBuffer(),
-            this.currency.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.receiver.toBytes(),
+            this.amount.toBytes(),
+            this.currency.toBytes(),
         ])
     }
 

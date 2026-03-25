@@ -1,9 +1,9 @@
-import { Buffer } from "buffer";
 import { Config } from "../../node"
-import type { IBuffer, IString } from "../../types"
+import type { IBytes, IString } from "../../types"
 import { Assert, ECODE, MitumError } from "../../error"
 
-export class Partition implements IBuffer, IString {
+const encoder = new TextEncoder();
+export class Partition implements IBytes, IString {
     private s: string
 
     constructor(s: string) {
@@ -22,8 +22,8 @@ export class Partition implements IBuffer, IString {
         return s instanceof Partition ? s : new Partition(s)
     }
 
-    toBuffer(): Buffer {
-        return Buffer.from(this.s)
+    toBytes(): Uint8Array {
+        return encoder.encode(this.s)
     }
 
     toString(): string {

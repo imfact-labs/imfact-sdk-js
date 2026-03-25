@@ -1,4 +1,3 @@
-import { Buffer } from "buffer";
 import { PointItem } from "./item"
 import { OperationFact } from "../base"
 
@@ -7,6 +6,7 @@ import { HINT } from "../../alias"
 import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
 import { Assert, ECODE, MitumError } from "../../error"
+import { concatBytes } from "../../utils/bytes"
 
 export class ApproveItem extends PointItem {
     readonly approved: Address
@@ -22,12 +22,12 @@ export class ApproveItem extends PointItem {
         this.approved = Address.from(approved);
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.approved.toBuffer(),
-            this.amount.toBuffer(),
-            this.currency.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.approved.toBytes(),
+            this.amount.toBytes(),
+            this.currency.toBytes(),
         ])
     }
 

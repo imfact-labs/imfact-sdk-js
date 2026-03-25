@@ -1,4 +1,3 @@
-import { Buffer } from "buffer";
 import { NFTItem } from "./item"
 import { Signers } from "./signer"
 import { OperationFact } from "../base"
@@ -10,6 +9,7 @@ import type { HintedObject } from "../../types"
 import { LongString } from "../../types"
 import { Assert, ECODE, MitumError } from "../../error"
 import { Config } from "../../node"
+import { concatBytes } from "../../utils/bytes"
 
 export class MintItem extends NFTItem {
     readonly receiver: Address
@@ -42,14 +42,14 @@ export class MintItem extends NFTItem {
         this.creators = creators
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.receiver.toBuffer(),
-            this.hash.toBuffer(),
-            this.uri.toBuffer(),
-            this.creators.toBuffer(),
-            this.currency.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.receiver.toBytes(),
+            this.hash.toBytes(),
+            this.uri.toBytes(),
+            this.creators.toBytes(),
+            this.currency.toBytes(),
         ])
     }
 

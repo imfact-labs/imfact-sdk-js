@@ -1,4 +1,3 @@
-import { Buffer } from "buffer";
 import { NFTItem } from "./item"
 import { OperationFact } from "../base"
 
@@ -7,6 +6,9 @@ import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
 import { HintedObject } from "../../types"
 import { Assert, ECODE, MitumError } from "../../error"
+import { concatBytes } from "../../utils/bytes"
+
+const encoder = new TextEncoder();
 
 export class ApproveAllItem extends NFTItem {
     readonly approved: Address
@@ -24,12 +26,12 @@ export class ApproveAllItem extends NFTItem {
         this.mode = mode
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.approved.toBuffer(),
-            Buffer.from(this.mode),
-            this.currency.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.approved.toBytes(),
+            encoder.encode(this.mode),
+            this.currency.toBytes(),
         ])
     }
 

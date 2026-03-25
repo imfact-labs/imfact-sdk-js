@@ -1,10 +1,10 @@
-import { Buffer } from "buffer";
 import { Fact, FactJson } from "../base"
 
 import { HINT } from "../../alias"
 import { CurrencyID } from "../../common"
 import { Address } from "../../key/address"
 import { Keys } from "../../key/pub"
+import { concatBytes } from "../../utils/bytes"
 
 export class UpdateKeyFact extends Fact {
     readonly sender: Address
@@ -19,12 +19,12 @@ export class UpdateKeyFact extends Fact {
         this._hash = this.hashing()
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.sender.toBuffer(),
-            this.keys.toBuffer(),
-            this.currency.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.sender.toBytes(),
+            this.keys.toBytes(),
+            this.currency.toBytes(),
         ])
     }
 

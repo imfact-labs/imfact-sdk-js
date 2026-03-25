@@ -1,4 +1,3 @@
-import { Buffer } from "buffer";
 import { OperationFact } from "../base"
 import { CredentialItem } from "./item"
 
@@ -6,6 +5,7 @@ import { HINT } from "../../alias"
 import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
 import { Assert, ECODE, MitumError } from "../../error"
+import { concatBytes } from "../../utils/bytes"
 
 export class RevokeItem extends CredentialItem {
     constructor(
@@ -18,10 +18,10 @@ export class RevokeItem extends CredentialItem {
         super(HINT.CREDENTIAL.REVOKE.ITEM, contract, holder, templateID, credentialID, currency)
     }
 
-    toBuffer(): Buffer {
-        return Buffer.concat([
-            super.toBuffer(),
-            this.currency.toBuffer(),
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.currency.toBytes(),
         ])
     }
 
