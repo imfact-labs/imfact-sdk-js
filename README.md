@@ -66,6 +66,9 @@ provider.on('accountsChanged', (newAccounts) => {
     
 Use the CommonJS (CJS) bundle via require. This bundle uses Node.js native modules (like the built-in Buffer) for optimal performance.
 
+⚠️ Warning! The signing method has been changed to an asynchronous API starting from v2.x.x. 
+Please refer to the [Breaking Change: Async Signing](#-breaking-change-async-signing) section.
+
 ```jsx
 // Example: Sending a transaction from a Node.js server
 const { Mitum } = require('@imfact/sdk');
@@ -149,3 +152,82 @@ $ npm run build
 After building, the dist directory will contain bundle.cjs.cjs (for Node.js testing) and bundle.esm.mjs (for browser testing).
 
 </details>
+
+<br>
+
+## Breaking Change: Async Signing
+
+Starting from v2.x.x, all signing methods are **asynchronous**.
+
+This change was introduced to ensure compatibility across environments (Node.js and Browser) and to align with modern cryptographic libraries such as `@noble/secp256k1`.
+
+### What changed?
+
+* `sign()` is now **async**
+* You must use `await` when calling it
+
+#### Before (v1.x.x)
+
+```ts
+op.sign(privateKey);
+mitum.operation.sign(privatekey, operation);
+mitum.signer.sign(privatekey, operation);
+```
+
+#### After (v2.x.x)
+
+```ts
+await op.sign(privateKey);
+await mitum.operation.sign(privatekey, operation);
+await mitum.signer.sign(privatekey, operation);
+```
+
+### Why this change?
+
+* Modern crypto libraries use **async APIs** for secure randomness and WebCrypto compatibility
+* Ensures consistent behavior across:
+
+  * Node.js
+  * Browsers
+  * Wallet environments
+
+Failing to use `await` may result in:
+
+* incomplete signatures
+
+---
+
+### Updated Node.js Example
+
+```js
+// Example: Sending a transaction from a Node.js server
+const { Mitum } = require('@imfact/sdk');
+
+const mitum = new Mitum("https://testnet.imfact.im");
+
+const sender = "0x...";
+const privateKey = "...";
+const recipientAddress = "0x...";
+const op = mitum.currency.transfer(sender, recipientAddress, "FACT", 100);
+
+const sendOperation = async () => {
+  // must use await
+  await op.sign(privateKey);
+  
+  try {
+    const info = await mitum.operation.send(op);
+    console.log(info);
+
+    const receipt = await info.wait();
+    console.log(receipt);
+  } catch (error) {
+    console.error("Failed to send operation:", error);
+  }
+};
+
+sendOperation();
+```
+
+---
+
+> Note: All cryptographic operations are now based on `Uint8Array` instead of Node.js `Buffer`, improving compatibility in browser environments. (Applied from version 2.x.x)
