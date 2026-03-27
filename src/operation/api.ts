@@ -126,7 +126,7 @@ export class Operation extends Generator {
 		await op.sign(
 			privatekey instanceof KeyPair ? privatekey.privateKey : privatekey,
 			option
-	)
+		)
 
 		return op
 	}
@@ -156,6 +156,13 @@ export class Operation extends Generator {
 		headers?: { [i: string]: any }
 	): Promise<OperationResponse> {
 		Assert.check( this.api !== undefined && this.api !== null, MitumError.detail(ECODE.NO_API, "API is not provided"));
+		if (operation && typeof (operation as any).then === "function") {
+			throw MitumError.detail(
+				ECODE.INVALID_OPERATION,
+				"Invalid operation: received a Promise instead of a signed operation. Did you forget to 'await' a signing function?"
+			);
+		}
+
 		Assert.check(
 			isOpFact(operation) || isHintedObject(operation), 
 			MitumError.detail(ECODE.INVALID_OPERATION, `input is neither in OP<Fact> nor HintedObject format`)
