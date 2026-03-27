@@ -185,13 +185,6 @@ export class Operation extends Generator {
 			);
 		}
 
-		if ((operation as any)._isAlterSigning) {
-			throw MitumError.detail(
-				ECODE.INVALID_OPERATION,
-				"Alternative signature is still being processed. Did you forget to await addAlterSign()?"
-			);
-		}
-
 		const isFactOp = isOpFact(operation);
 		const isHintedOp = isHintedObject(operation);
 		Assert.check(
