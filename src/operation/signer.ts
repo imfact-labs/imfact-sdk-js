@@ -7,8 +7,12 @@ import { KeyPair } from "../key/keypair"
 import { NodeAddress } from "../key/address"
 import { Generator, HintedObject, FullTimeStamp, TimeStamp, IP } from "../types"
 import { StringAssert, Assert, ECODE, MitumError } from "../error"
-import { isOpFact, isHintedObject, isHintedObjectFromUserOp} from "../utils/typeGuard"
-import { concatBytes } from "../utils/bytes"
+import { isOpFact, isHintedObject, isHintedObjectFromUserOp, isBase58Encoded} from "../utils/typeGuard"
+import { concatBytes, toBytes } from "../utils/bytes"
+import { encodePersonalMessage } from "../utils/encode"
+import { sha256 as nobleSha256 } from "@noble/hashes/sha256"
+import * as secp256k1 from "@noble/secp256k1"
+import { Config } from "../node"
 
 const encoder = new TextEncoder()
 
@@ -222,5 +226,98 @@ export class Signer extends Generator {
                 ).empty().not().excute();
             }
         });
+
+    }
+
+    /**
+     * Signs a personal message using the provided private key.
+     *
+     * @param {string | Key} privatekey - The private key used for signing.
+     * @param {string} message - The message to sign.
+     * @returns {Promise<string>} Base58-encoded signature.
+     */
+    async signMessage(
+        privatekey: string | Key,
+        message: string
+    ): Promise<string> {
+
+        StringAssert.with(message, MitumError.detail(ECODE.INVALID_LENGTH, `message must not be empty or too long (over ${Config.MSG_SIZE.max} bytes)`))
+            .empty().not()
+            .satisfyConfig({ satisfy: (len: number) => len <= Config.MSG_SIZE.max } as any)
+            .excute();
+        const keypair = KeyPair.fromPrivateKey(privatekey);
+        const msg = encodePersonalMessage(message);
+        const sig = await keypair.sign(msg);
+        return base58.encode(sig);
+    }
+
+    /**
+     * Verifies a personal message signature using the provided public key.
+     *
+     * @param {string | Key} publickey - The public key of the signer.
+     * @param {string} message - The original message.
+     * @param {string} signature - The base58-encoded signature.
+     * @returns {Promise<boolean>} True if valid, otherwise false.
+     */
+    async verifyMessage(
+        publickey: string | Key,
+        message: string,
+        signature: string
+    ): Promise<boolean> {
+        try {
+            StringAssert.with(message, MitumError.detail(ECODE.INVALID_LENGTH, `message must not be empty or too long (over ${Config.MSG_SIZE.max} bytes)`))
+                .empty().not()
+                .satisfyConfig({ satisfy: (len: number) => len <= Config.MSG_SIZE.max } as any)
+                .excute();
+
+
+            StringAssert.with(signature, MitumError.detail(ECODE.INVALID_SIG_TYPE, "signature must not be empty"))
+                .empty().not()
+                .excute();
+
+            Assert.check(
+                isBase58Encoded(signature),
+                MitumError.detail(ECODE.INVALID_SIG_TYPE, "signature must be base58 encoded")
+            );
+
+            const pub = Key.from(publickey);
+
+            const sigBytes = typeof signature === "string" ? base58.decode(signature) : signature;
+
+            Assert.check(
+                sigBytes.length > 4,
+                MitumError.detail(ECODE.INVALID_SIG_TYPE, "invalid signature length")
+            );
+
+            const view = new DataView(sigBytes.buffer, sigBytes.byteOffset, 4);
+            const rlen = view.getUint32(0, true);
+
+            Assert.check(
+                rlen > 0 && rlen <= sigBytes.length - 4,
+                MitumError.detail(ECODE.INVALID_SIG_TYPE, "invalid r length in signature")
+            );
+
+            const r = sigBytes.slice(4, 4 + rlen);
+            const s = sigBytes.slice(4 + rlen);
+
+            const der = concatBytes([
+                new Uint8Array([0x30]),
+                new Uint8Array([2 + r.length + 2 + s.length]),
+                new Uint8Array([0x02, r.length]),
+                r,
+                new Uint8Array([0x02, s.length]),
+                s,
+            ]);
+
+    
+            const digest = encodePersonalMessage(message); 
+            const msgHash = nobleSha256(digest);
+            const pubBytes = toBytes(pub.noSuffix);
+
+            return secp256k1.verify(der, msgHash, pubBytes);
+
+        } catch {
+            return false;
+        }
     }
 }
