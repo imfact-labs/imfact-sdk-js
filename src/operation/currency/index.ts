@@ -9,7 +9,7 @@ import { RegisterCurrencyFact } from "./register-currency"
 import { UpdateCurrencyFact } from "./update-currency"
 import { MintFact } from "./mint"
 
-import { CurrencyDesign, CurrencyPolicy, NilFeeer, FixedFeeer, RatioFeeer } from "./currency-design"
+import { CurrencyDesign, CurrencyPolicy, NilFeeer, FixedFeeer, FixedItemFeeer } from "./currency-design"
 
 import { Operation, AllowedOperation } from "../base"
 import { Operation as OP } from "../"
@@ -25,12 +25,10 @@ import { SUFFIX, HINT } from "../../alias"
 
 type currencyPolicyData = {
     minBalance: string | number | Big
-    feeType: "nil" | "fixed" | "ratio"
+    feeType: "nil" | "fixed" | "fixed-item"
     feeReceiver: string | Address
     fee?: string | number | Big
-    ratio?: number
-    minFee?: string | number | Big
-    maxFee?: string | number | Big
+    item_fee?: string | number | Big
 }
 
 type keysType =
@@ -80,9 +78,7 @@ export class Currency extends Generator {
                 data.minBalance,
                 data.feeReceiver,
                 data.fee,
-                data.ratio,
-                data.minFee,
-                data.maxFee,
+                data.item_fee,
             ),
         )
                 
@@ -116,22 +112,18 @@ export class Currency extends Generator {
                     data.minBalance,
                     data.feeReceiver,
                     data.fee,
-                    data.ratio,
-                    data.minFee,
-                    data.maxFee,
+                    data.item_fee
                 ),
             ),
         )
     }
 
-    private buildPolicy(
-        feeType: "nil" | "fixed" | "ratio",
+     private buildPolicy(
+        feeType: "nil" | "fixed" | "fixed-item",
         minBalance: string | number | Big,
         receiver: string | Address,
         fee?: string | number | Big,
-        ratio?: number,
-        min?: string | number | Big,
-        max?: string | number | Big,
+        item_fee?: string | number | Big,
     ): CurrencyPolicy {
         Address.from(receiver);
         switch (feeType) {
@@ -143,23 +135,16 @@ export class Currency extends Generator {
                     MitumError.detail(ECODE.CURRENCY.INVALID_CURRENCY_FEEER, "no fee")
                 )
                 return new CurrencyPolicy(minBalance, new FixedFeeer(receiver, fee!))
-            case "ratio":
+            case "fixed-item":
                 Assert.check(
-                    ratio !== undefined,
-                    MitumError.detail(ECODE.CURRENCY.INVALID_CURRENCY_FEEER, "no ratio")
-                )
-                Assert.check(
-                    min !== undefined,
-                    MitumError.detail(ECODE.CURRENCY.INVALID_CURRENCY_FEEER, "no min fee")
+                    fee !== undefined,
+                    MitumError.detail(ECODE.CURRENCY.INVALID_CURRENCY_FEEER, "no base fee")
                 )
                 Assert.check(
-                    max !== undefined,
-                    MitumError.detail(ECODE.CURRENCY.INVALID_CURRENCY_FEEER, "no max fee")
+                    item_fee !== undefined,
+                    MitumError.detail(ECODE.CURRENCY.INVALID_CURRENCY_FEEER, "no item fee")
                 )
-                return new CurrencyPolicy(
-                    minBalance,
-                    new RatioFeeer(receiver, ratio!, min!, max!),
-                )
+                return new CurrencyPolicy(minBalance, new FixedItemFeeer(receiver, fee!, item_fee!))
             default:
                 throw MitumError.detail(ECODE.CURRENCY.INVALID_CURRENCY_FEEER, "invalid fee type")
         }

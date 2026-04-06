@@ -6,13 +6,14 @@ import { AuthDID } from "./authdid"
 import { Signer } from "./signer"
 
 import { Config } from "../node"
-import { operation as api, getAPIData } from "../api"
+import { currency, operation as api, getAPIData } from "../api"
 import { Key, KeyPair, Address } from "../key"
 import { Generator, HintedObject, IP, SuccessResponse, ErrorResponse } from "../types"
 import { Assert, ECODE, MitumError, ArrayAssert } from "../error"
 import { isOpFact, isHintedObject } from "../utils/typeGuard"
-import { isSuccessResponse } from "../utils"
+import { isSuccessResponse, isErrorResponse } from "../utils"
 import { isBase58Encoded } from "../utils/typeGuard"
+import { CurrencyID } from "../common"
 import { HINT } from "../alias"
 
 import * as Base from "./base"
@@ -226,6 +227,96 @@ export class Operation extends Generator {
 		const sendResponse = await getAPIData(() => api.send(this.api, opJson, this.delegateIP, headers));
 		return new OperationResponse(sendResponse, this.networkID, this.api, this.delegateIP)
 	}
+
+	/**
+	 * Estimate the expected transaction fee based on the currency policy.
+	 *
+	 * This function fetches the currency policy from the blockchain and calculates
+	 * the fee according to its configured fee model.
+	 *
+	 * Supported fee types:
+	 * - NIL: always returns 0
+	 * - FIXED: returns a constant fee
+	 * - FIXED_ITEM: base fee + (item_fee × number of items in operation)
+	 *
+	 * @param {HintedObject | BaseOperation<Fact>} operation - The operation to estimate fee for.
+	 * @param {string | CurrencyID} currencyID - The currency identifier.
+	 * @returns {Promise<number>} Estimated fee amount.
+	 */
+	async estimateFee(
+		operation: HintedObject | OP<Fact>,
+		currencyID: string | CurrencyID,
+	): Promise<number> {
+		CurrencyID.from(currencyID);
+
+		Assert.check(
+			this.api != null,
+			MitumError.detail(ECODE.NO_API, "API is not provided")
+		);
+
+		Assert.check(
+			isOpFact(operation) || isHintedObject(operation), 
+			MitumError.detail(ECODE.INVALID_OPERATION, `input is neither in OP<Fact> nor HintedObject format`)
+		)
+
+		try {
+			const res = await getAPIData(() =>
+				currency.getCurrency(this.api, currencyID, this.delegateIP)
+			);
+
+			if (isErrorResponse(res)) {
+				throw MitumError.detail(
+					ECODE.CURRENCY.INVALID_CURRENCY_FEEER,
+					`Failed to fetch currency data: \n${JSON.stringify(res, null, 2)}`
+				);
+			}
+
+			if (!isSuccessResponse(res)) {
+				throw MitumError.detail(
+					ECODE.CURRENCY.INVALID_CURRENCY_FEEER,
+					`Invalid response format`
+				);
+			}
+
+			const feeer = res.data.policy?.feeer;
+			Assert.check(
+				feeer != null,
+				MitumError.detail(ECODE.CURRENCY.INVALID_CURRENCY_FEEER, "feeer policy not found")
+			);
+
+			const hint = feeer._hint;
+
+			if (hint.includes(HINT.CURRENCY.FEEER.NIL)) {
+				return 0;
+			}
+
+			if (hint.includes(HINT.CURRENCY.FEEER.FIXED)) {
+				return Number(feeer.amount);
+			}
+
+			if (hint.includes(HINT.CURRENCY.FEEER.FIXED_ITEM)) {
+				const opJson = isOpFact(operation)
+					? operation.toHintedObject()
+					: operation;
+				const itemCount =
+					"items" in opJson.fact && Array.isArray(opJson.fact.items)
+						? opJson.fact.items.length
+						: 0;
+				return Number(feeer.amount) + Number(feeer.item_fee_amount) * itemCount;
+			}
+
+			throw MitumError.detail(
+				ECODE.CURRENCY.INVALID_CURRENCY_FEEER,
+				`Unsupported feeer type: ${hint}`
+			);
+
+		} catch (error: any) {
+			throw MitumError.detail(
+				ECODE.CURRENCY.INVALID_CURRENCY_DESIGN,
+				`Failed to estimate fee: ${error?.message ?? error}`
+			);
+		}
+	}
 }
 
 
@@ -311,7 +402,6 @@ export class OperationResponse extends Operation {
         }
 		Assert.check(stop, MitumError.detail(ECODE.TIME_OUT, `timeout reached (${maxTimeout/1000} seconds).`))
     }
-
 }
 
 const credential = {

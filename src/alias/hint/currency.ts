@@ -7,7 +7,7 @@ export default {
     FEEER: {
         NIL: "mitum-currency-nil-feeer",
         FIXED: "mitum-currency-fixed-feeer",
-        RATIO: "mitum-currency-ratio-feeer",
+        FIXED_ITEM: "mitum-currency-fixed-item-feeer",
     },
     CREATE_ACCOUNT: {
         ITEM: "mitum-currency-create-account-multiple-amounts",

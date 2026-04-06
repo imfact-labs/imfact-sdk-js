@@ -1,7 +1,7 @@
 import { HINT } from "../../alias"
 import { Address } from "../../key/address"
 import { Hint, CurrencyID } from "../../common"
-import { Big, Float, HintedObject, IBytes, IHintedObject } from "../../types"
+import { Big, HintedObject, IBytes, IHintedObject } from "../../types"
 import { concatBytes } from "../../utils/bytes"
 
 export class CurrencyDesign implements IBytes, IHintedObject {
@@ -80,14 +80,9 @@ export class CurrencyPolicy implements IBytes, IHintedObject {
 
 abstract class Feeer implements IBytes, IHintedObject {
     private hint: Hint
-    readonly exchangeMinAmount?: Big
 
-    constructor(hint: string, exchangeMinAmount?: string | number | Big) {
+    constructor(hint: string) {
         this.hint = new Hint(hint)
-
-        if (exchangeMinAmount) {
-            this.exchangeMinAmount = exchangeMinAmount instanceof Big ? exchangeMinAmount : new Big(exchangeMinAmount)
-        }
     }
 
     abstract toBytes(): Uint8Array
@@ -123,7 +118,6 @@ export class FixedFeeer extends Feeer {
         return concatBytes([
             this.receiver.toBytes(), 
             this.amount.toBytes(), 
-            this.exchangeMinAmount ? this.exchangeMinAmount.toBytes() : new Uint8Array()
         ])
     }
 
@@ -134,38 +128,27 @@ export class FixedFeeer extends Feeer {
             receiver: this.receiver.toString(),
         }
 
-        if (this.exchangeMinAmount) {
-            return {
-                ...feeer,
-                exchange_min_amount: this.exchangeMinAmount.toString()
-            }
-        }
-
         return feeer
     }
 }
 
-export class RatioFeeer extends Feeer {
+export class FixedItemFeeer extends Feeer {
     readonly receiver: Address
-    readonly ratio: Float
-    readonly min: Big
-    readonly max: Big
+    readonly amount: Big
+    readonly item_fee_amount: Big
 
-    constructor(receiver: string | Address, ratio: number, min: string | number | Big, max: string | number | Big) {
-        super(HINT.CURRENCY.FEEER.RATIO)
+    constructor(receiver: string | Address, amount: string | number | Big, item_fee_amount: string | number | Big) {
+        super(HINT.CURRENCY.FEEER.FIXED_ITEM)
         this.receiver = Address.from(receiver)
-        this.ratio = new Float(ratio)
-        this.min = min instanceof Big ? min : new Big(min)
-        this.max = max instanceof Big ? max : new Big(max)
+        this.amount = Big.from(amount)
+        this.item_fee_amount = Big.from(item_fee_amount)
     }
 
     toBytes(): Uint8Array {
         return concatBytes([
             this.receiver.toBytes(), 
-            this.ratio.toBytes(),
-            this.min.toBytes(),
-            this.max.toBytes(), 
-            this.exchangeMinAmount ? this.exchangeMinAmount.toBytes() : new Uint8Array()
+            this.amount.toBytes(),
+            this.item_fee_amount.toBytes(),
         ])
     }
 
@@ -173,16 +156,8 @@ export class RatioFeeer extends Feeer {
         const feeer = {
             ...super.toHintedObject(),
             receiver: this.receiver.toString(),
-            ratio: this.ratio.n,
-            min: this.min.toString(),
-            max: this.max.toString(),
-        }
-
-        if (this.exchangeMinAmount) {
-            return {
-                ...feeer,
-                exchange_min_amount: this.exchangeMinAmount.toString(),
-            }
+            amount: this.amount.toString(),
+            item_fee_amount: this.item_fee_amount.toString(),
         }
 
         return feeer
