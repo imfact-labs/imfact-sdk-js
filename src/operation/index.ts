@@ -237,11 +237,13 @@ export class Operation extends Generator {
 	 * Supported fee types:
 	 * - NIL: always returns 0
 	 * - FIXED: returns a constant fee
-	 * - FIXED_ITEM: base fee + (item_fee × number of items in operation)
+	 * - FIXED_ITEM:
+	 *   - If no items → treated as 1 item → fee = baseFee + itemFee
+	 *   - If items exist → fee = baseFee + (itemFee × item count)
 	 *
 	 * @param {HintedObject | BaseOperation<Fact>} operation - The operation to estimate fee for.
 	 * @param {string | CurrencyID} currencyID - The currency identifier.
-	 * @returns {Promise<number>} Estimated fee amount.
+	 * @returns {Promise<number>} Estimated fee amount. (in smallest unit of the currency)
 	 */
 	async estimateFee(
 		operation: HintedObject | OP<Fact>,
@@ -301,7 +303,7 @@ export class Operation extends Generator {
 				const itemCount =
 					"items" in opJson.fact && Array.isArray(opJson.fact.items)
 						? opJson.fact.items.length
-						: 0;
+						: 1; // Default to 1 if items are not present or not an array
 				return Number(feeer.amount) + Number(feeer.item_fee_amount) * itemCount;
 			}
 
