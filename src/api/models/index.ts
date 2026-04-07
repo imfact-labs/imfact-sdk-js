@@ -1,9 +1,9 @@
 import currency from "./currency"
-import authdid from "./authdid"
+import did from "./did"
 
 export default {
     currency,
     contract: {
-        authdid
+        did
     },
 }

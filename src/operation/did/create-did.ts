@@ -11,7 +11,7 @@ export class CreateFact extends ContractFact {
         contract: string | Address,
         currency: string | CurrencyID,
     ) {
-        super(HINT.AUTH_DID.CREATE_DID.FACT, token, sender, contract, currency);
+        super(HINT.DID.CREATE_DID.FACT, token, sender, contract, currency);
         this._hash = this.hashing();
     }
 
@@ -29,6 +29,6 @@ export class CreateFact extends ContractFact {
     }
 
     get operationHint() {
-        return HINT.AUTH_DID.CREATE_DID.OPERATION
+        return HINT.DID.CREATE_DID.OPERATION
     }
 }

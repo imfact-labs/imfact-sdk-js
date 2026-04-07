@@ -44,7 +44,7 @@ export class AsymKeyAuth extends Authentication {
         controller: string | LongString,
         publicKey: string | Key
     ) {
-        super(HINT.AUTH_DID.AUTHENTICATION);
+        super(HINT.DID.AUTHENTICATION);
         this.id = LongString.from(id);
         validateDID(this.id.toString(), true);
         this.type = type;
@@ -126,7 +126,7 @@ export class LinkedAuth extends Authentication {
         targetId: string | LongString,
         allowed: AllowedOperation[]
     ) {
-        super(HINT.AUTH_DID.AUTHENTICATION);
+        super(HINT.DID.AUTHENTICATION);
         this.id = LongString.from(id);
         validateDID(this.id.toString(), true);
         this.type = "LinkedVerificationMethod";
@@ -226,7 +226,7 @@ export class Document implements IBytes, IHintedObject {
         verificationMethod: (AsymKeyAuth | LinkedAuth)[],
         service?: Service[]
     ) {
-        this.hint = new Hint(HINT.AUTH_DID.DOCUMENT);
+        this.hint = new Hint(HINT.DID.DOCUMENT);
         const contexts = Array.isArray(context) ? context : [context];
         this.context = contexts.map(ctx => LongString.from(ctx));
         this.id = LongString.from(id);
@@ -235,7 +235,7 @@ export class Document implements IBytes, IHintedObject {
         Assert.check(
             new Set(authentication.map(i => i.toString())).size === authentication.length,
             MitumError.detail(
-                ECODE.AUTH_DID.INVALID_DOCUMENT,
+                ECODE.DID.INVALID_DOCUMENT,
                 "duplicate authentication id found in authentication"
             )
         );
@@ -243,7 +243,7 @@ export class Document implements IBytes, IHintedObject {
         Assert.check(
             new Set(verificationMethod.map(i => i.toString())).size === verificationMethod.length,
             MitumError.detail(
-                ECODE.AUTH_DID.INVALID_DOCUMENT,
+                ECODE.DID.INVALID_DOCUMENT,
                 "duplicate authentication id found in verificationMethod"
             )
         );
@@ -253,7 +253,7 @@ export class Document implements IBytes, IHintedObject {
             Assert.check(
                 Array.isArray(service) && service.every(s => s instanceof Service),
                 MitumError.detail(
-                    ECODE.AUTH_DID.INVALID_DOCUMENT,
+                    ECODE.DID.INVALID_DOCUMENT,
                     "service must be an array of Service"
                 )
             );

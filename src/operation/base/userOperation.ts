@@ -214,7 +214,7 @@ export class UserOperation<T extends Fact> extends Operation<T> {
     private isSenderDidOwner(sender: string | Address, did: string, id?: true) {
         Assert.check(
             sender.toString() === validateDID(did.toString(), id).toString(),
-            MitumError.detail(ECODE.AUTH_DID.INVALID_DID, `The owner of did must match the sender(${sender.toString()}). check the did (${did.toString()})`)
+            MitumError.detail(ECODE.DID.INVALID_DID, `The owner of did must match the sender(${sender.toString()}). check the did (${did.toString()})`)
         );
     }
 

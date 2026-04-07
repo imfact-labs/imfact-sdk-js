@@ -3,29 +3,33 @@ import { Address } from "../../key"
 import { LongString } from "../../types"
 import { CurrencyID } from "../../common"
 import { ContractFact, FactJson } from "../base"
+import { Document } from "./document"
 import { concatBytes } from "../../utils/bytes"
 
-
-export class RegisterModelFact extends ContractFact {
-    readonly didMethod: LongString
+export class UpdateDocumentFact extends ContractFact {
+    readonly did: LongString;
+    readonly document: Document;
 
     constructor(
         token: string, 
         sender: string | Address, 
         contract: string | Address,
-        didMethod: string,
+        did: string,
+        document: Document,
         currency: string | CurrencyID,
     ) {
-        super(HINT.AUTH_DID.REGISTER_MODEL.FACT, token, sender, contract, currency)
-
-        this.didMethod = LongString.from(didMethod)
-        this._hash = this.hashing()
+        super(HINT.DID.UPDATE_DID_DOCUMENT.FACT, token, sender, contract, currency);
+        
+        this.did = LongString.from(did);
+        this.document = document;
+        this._hash = this.hashing();
     }
 
     toBytes(): Uint8Array {
         return concatBytes([
             super.toBytes(),
-            this.didMethod.toBytes(),
+            this.did.toBytes(),
+            this.document.toBytes(),
             this.currency.toBytes(),
         ])
     }
@@ -33,12 +37,13 @@ export class RegisterModelFact extends ContractFact {
     toHintedObject(): FactJson {
         return {
             ...super.toHintedObject(),
-            didMethod: this.didMethod.toString(),
+            did: this.did.toString(),
+            document: this.document.toHintedObject(),
         }
     }
 
     get operationHint() {
-        return HINT.AUTH_DID.REGISTER_MODEL.OPERATION
+        return HINT.DID.UPDATE_DID_DOCUMENT.OPERATION
     }
 }
 

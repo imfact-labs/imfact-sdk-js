@@ -6,19 +6,19 @@ import {
     Account, Currency, Contract,
     Operation,
     Signer,
-    AuthDID,
+    Did,
     AccountAbstraction,
     credential, dao, nft, payment,
 	point, storage, timestamp, token
 } from "./operation"
 import { currency, account, contract } from "./operation/currency/index"
-import { authdid } from "./operation/authdid/index";
+import { did } from "./operation/did/index";
 
 const AllowedOperation = {
     currency,
     account,
     contract,
-    authdid,
+    did,
     credential, dao, nft, payment,
 	point, storage, timestamp, token
 } as const;
@@ -37,7 +37,7 @@ export class Mitum extends Generator {
     private _block: Block
     private _operation: Operation
     private _signer: Signer
-    private _authdid: AuthDID
+    private _did: Did
     private _accountAbstraction: AccountAbstraction
 
     public constructor(api?: string, delegateIP?: string) {
@@ -51,7 +51,7 @@ export class Mitum extends Generator {
         this._signer = new Signer(this.networkID, this.api)
 
         this._contract = new Contract(this.networkID, this.api, this.delegateIP)
-        this._authdid = new AuthDID(this.networkID, this.api, this.delegateIP)
+        this._did = new Did(this.networkID, this.api, this.delegateIP)
         this._accountAbstraction = new AccountAbstraction(this.networkID, this.api, this.delegateIP)
 
         this._utils = new Utils();
@@ -66,7 +66,7 @@ export class Mitum extends Generator {
         this._operation = new Operation(this.networkID, this.api, this.delegateIP)
 
         this._contract = new Contract(this.networkID, this.api, this.delegateIP)
-        this._authdid = new AuthDID(this.networkID, this.api, this.delegateIP)
+        this._did = new Did(this.networkID, this.api, this.delegateIP)
         this._accountAbstraction = new AccountAbstraction(this.networkID, this.api, this.delegateIP)
 
         this._utils = new Utils();
@@ -100,8 +100,8 @@ export class Mitum extends Generator {
         return this._contract
     }
 
-    get authdid(): AuthDID {
-        return this._authdid
+    get did(): Did {
+        return this._did
     }
 
     get aa(): AccountAbstraction {

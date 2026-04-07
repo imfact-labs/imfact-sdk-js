@@ -54,7 +54,7 @@ export const isBase58Encoded = (value: string): boolean => {
 
 const invalidDid = (value: string, reason: string) => {
     throw MitumError.detail(
-        ECODE.AUTH_DID.INVALID_DID,
+        ECODE.DID.INVALID_DID,
         `Invalid DID: "${value}" (${reason})`
     );
 };

@@ -1,5 +1,5 @@
 import CURRENCY from "./currency"
-import AUTH_DID from "./authdid"
+import DID from "./did"
 import CREDENTIAL from "./credential"
 import DAO from "./dao"
 import NFT from "./nft"
@@ -12,7 +12,7 @@ import TOKEN from "./token"
 export default {
     FACT_SIGN: "base-fact-sign",
     CURRENCY,
-    AUTH_DID,
+    DID,
     CREDENTIAL,
     DAO,
     NFT,

@@ -2,7 +2,7 @@ import { SignOption, Operation as OP, Fact } from "./base"
 
 import { Currency, Account, Contract } from "./currency"
 import { AccountAbstraction } from "./accountAbstraction"
-import { AuthDID } from "./authdid"
+import { Did } from "./did"
 import { Signer } from "./signer"
 
 import { Config } from "../node"
@@ -561,7 +561,7 @@ const token = {
 
 export {
 	Currency, Account, Contract,
-	AuthDID,
+	Did,
 	AccountAbstraction,
 	Signer,
 	Base,

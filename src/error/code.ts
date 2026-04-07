@@ -3,7 +3,7 @@ export type ErrorCode = (
     typeof ECODE[keyof typeof ECODE]
     | typeof ECODE.HDWALLET[keyof typeof ECODE.HDWALLET]
     | typeof ECODE.CURRENCY[keyof typeof ECODE.CURRENCY]
-    | typeof ECODE.AUTH_DID[keyof typeof ECODE.AUTH_DID]
+    | typeof ECODE.DID[keyof typeof ECODE.DID]
 )
 
 export const ECODE = {
@@ -82,8 +82,8 @@ export const ECODE = {
         INVALID_CURRENCY_POLICY: "EC_INVALID_CURRENCY_POLICY",
         INVALID_CURRENCY_DESIGN: "EC_INVALID_CURRENCY_DESIGN",
     },
-    // AUTH_DID Errors
-    AUTH_DID: {
+    // DID Errors
+    DID: {
         INVALID_DID: "EC_INVALID_DID",
         INVALID_DOCUMENT: "EC_INVALID_DOCUMENT",
         INVALID_AUTHENTICATION: "EC_INVALID_AUTHENTICATION"
