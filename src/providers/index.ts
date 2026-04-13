@@ -44,7 +44,7 @@ export class BrowserProvider {
     constructor(injectedProvider: InjectedProvider) {
     if (!injectedProvider || typeof injectedProvider.request !== 'function') {
         throw new Error(
-        "Invalid injected provider. A provider object with a 'request' method is required."
+            "Invalid injected provider. A provider object with a 'request' method is required."
         );
     }
         this.#injectedProvider = injectedProvider;
@@ -112,20 +112,39 @@ export class BrowserProvider {
     }
     
     /**
-     * Requests the wallet to sign and broadcast a transaction to the Mitum network.
+     * Requests the wallet to sign and broadcast a transaction to the ImFACT network.
      * This will trigger a signing confirmation prompt from the wallet.
-     * @param {object} transactionObject A transaction object created by the Mitum SDK.
+     * @param {object} transactionObject A transaction object created by the ImFACT SDK.
      * @returns {Promise<string>} A promise that resolves to the transaction hash upon successful broadcast.
      * @throws {Error} If the transactionObject is null or undefined.
      */
     async sendTransaction(transactionObject: object): Promise<string> {
-    if (!transactionObject) {
-        throw new Error('A transaction object is required.');
+        if (!transactionObject) {
+            throw new Error('A transaction object is required.');
+        }
+        return this.request<string>({
+            method: 'imfact_sendTransaction',
+            params: [transactionObject],
+        });
     }
-    return this.request<string>({
-        method: 'imfact_sendTransaction',
-        params: [transactionObject],
-    });
+
+    /**
+     * Requests the wallet to sign a personal message with the selected account.
+     * This will trigger a signing confirmation prompt from the wallet.
+     * @param personalMsg - Message to sign (non-empty string).
+     * @returns Promise resolving to the signature string.
+     * @throws {Error} If the message is empty or signing fails/rejected.
+     * @example
+     * const sig = await provider.signMessage("Hello, ImFact!");
+     */
+    async signMessage(personalMsg: string): Promise<string> {
+        if (!personalMsg) {
+            throw new Error('A message to sign is required.');
+        }
+        return this.request<string>({
+            method: 'imfact_signMessage',
+            params: [personalMsg],
+        });
     }
 
     /**
@@ -133,7 +152,7 @@ export class BrowserProvider {
      * @returns {Promise<string>} A promise that resolves to the chain ID string.
      */
     async getChainId(): Promise<string> {
-    return this.request<string>({ method: 'imfact_getChainId' });
+        return this.request<string>({ method: 'imfact_getChainId' });
     }
 
     /**
@@ -143,9 +162,9 @@ export class BrowserProvider {
      * @returns {Promise<null>} A promise that resolves to null if the switch was successful.
      */
     async switchChain(chainId: string): Promise<null> {
-    if (!chainId) {
-        throw new Error('A chainId is required.');
-    }
+        if (!chainId) {
+            throw new Error('A chainId is required.');
+        }
         return this.request<null>({
             method: 'imfact_switchChain',
             params: [{ chainId }],
