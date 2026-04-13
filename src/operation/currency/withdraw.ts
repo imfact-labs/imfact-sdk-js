@@ -1,9 +1,9 @@
 import { CurrencyItem } from "./item"
-import { OperationFact } from "../base"
+import { CurrencyOperationFact } from "../base"
 
 import { HINT } from "../../alias"
 import { Address } from "../../key/address"
-import { Amount } from "../../common"
+import { Amount, CurrencyID } from "../../common"
 import { SortFunc } from "../../utils"
 import { HintedObject } from "../../types"
 import { Assert, ECODE, MitumError } from "../../error"
@@ -36,9 +36,9 @@ export class WithdrawItem extends CurrencyItem {
     }
 }
 
-export class WithdrawFact extends OperationFact<WithdrawItem> {
-    constructor(token: string, sender: string | Address, items: WithdrawItem[]) {
-        super(HINT.CURRENCY.WITHDRAW.FACT, token, sender, items)
+export class WithdrawFact extends CurrencyOperationFact<WithdrawItem> {
+    constructor(token: string, sender: string | Address, items: WithdrawItem[], currency: string | CurrencyID) {
+        super(HINT.CURRENCY.WITHDRAW.FACT, token, sender, items, currency)
 
         Assert.check(
             new Set(items.map(it => it.toString())).size === items.length,
