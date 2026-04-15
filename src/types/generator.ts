@@ -18,6 +18,11 @@ export abstract class Generator {
 
     protected setAPI(api?: string | IP) {
         if (typeof api === "string") {
+            if (api === "") {
+                this._api = undefined;
+                return;
+            }
+
             const cleanApi = api.endsWith('/') ? api.slice(0, -1) : api;
 
             try {
@@ -28,7 +33,7 @@ export abstract class Generator {
                     `Invalid API URL provided: ${cleanApi}`
                 );
             }
-    
+
             this._api = IP.from(cleanApi);
         } else if (api instanceof IP) {
             this._api = api;
@@ -37,8 +42,13 @@ export abstract class Generator {
         }
     }
 
-    protected setDelegate(delegateIP?: string | IP) { 
+    protected setDelegate(delegateIP?: string | IP) {
         if (typeof delegateIP === "string") {
+            if (delegateIP === "") {
+                this._delegateIP = undefined;
+                return;
+            }
+
             const cleanDelegate = delegateIP.endsWith('/') ? delegateIP.slice(0, -1) : delegateIP;
 
             try {
@@ -49,7 +59,7 @@ export abstract class Generator {
                     `Invalid delegate URL provided: ${cleanDelegate}`
                 );
             }
-    
+
             this._delegateIP = IP.from(cleanDelegate);
         } else if (delegateIP instanceof IP) {
             this._delegateIP = delegateIP;
