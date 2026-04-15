@@ -9,8 +9,23 @@ import { Generator, HintedObject, IP, SuccessResponse, ErrorResponse } from "../
 import { Assert, ECODE, MitumError, ArrayAssert } from "../error"
 import { isOpFact, isHintedObject, isBase58Encoded } from "../utils/typeGuard"
 import { isSuccessResponse, isErrorResponse } from "../utils"
+import { factFromJson } from "../utils/factFromJson"
 import { CurrencyID } from "../common"
 import { HINT } from "../alias/index"
+
+export interface FeeEstimate {
+	_hint: string;
+	currency_id: string;
+	total_fee: string;
+	base_fee?: string;
+	item_unit_fee?: string;
+	item_count?: number;
+	item_fee?: string;
+	data_size_unit_fee?: string;
+	data_size_unit?: number;
+	data_size?: number;
+	data_size_fee?: string;
+}
 
 export class Operation extends Generator {
 	constructor(
@@ -198,21 +213,22 @@ export class Operation extends Generator {
 	 * the fee according to its configured fee model.
 	 *
 	 * Supported fee types:
-	 * - NIL: always returns 0
-	 * - FIXED: returns a constant fee
+	 * - NIL: always returns total_fee "0"
+	 * - FIXED: returns total_fee as a constant fee
 	 * - FIXED_ITEM:
-	 *   - If no items → treated as 1 item → fee = baseFee + itemFee
-	 *   - If items exist → fee = baseFee + (itemFee × item count)
+	 *   - If no items → treated as 1 item → total_fee = base_fee + item_fee
+	 *   - If items exist → total_fee = base_fee + (item_unit_fee × item_count)
+	 * - FIXED_DETAILED: total_fee = base_fee + item_fee + data_size_fee
 	 *
 	 * @param {HintedObject | BaseOperation<Fact>} operation - The operation to estimate fee for.
 	 * @param {string | CurrencyID} currencyID - The currency identifier.
-	 * @returns {Promise<number>} Estimated fee amount. (in smallest unit of the currency)
+	 * @returns {Promise<FeeEstimate>} Detailed fee breakdown. All amounts are in the smallest unit of the currency.
 	 */
 	async estimateFee(
 		operation: HintedObject | BaseOperation<Fact>,
 		currencyID: string | CurrencyID,
-	): Promise<number> {
-		CurrencyID.from(currencyID);
+	): Promise<FeeEstimate> {
+		const cid = CurrencyID.from(currencyID).toString();
 
 		Assert.check(
 			this.api != null,
@@ -220,7 +236,7 @@ export class Operation extends Generator {
 		);
 
 		Assert.check(
-			isOpFact(operation) || isHintedObject(operation), 
+			isOpFact(operation) || isHintedObject(operation),
 			MitumError.detail(ECODE.INVALID_OPERATION, `input is neither in OP<Fact> nor HintedObject format`)
 		)
 
@@ -249,25 +265,66 @@ export class Operation extends Generator {
 				MitumError.detail(ECODE.CURRENCY.INVALID_CURRENCY_FEEER, "feeer policy not found")
 			);
 
-			const hint = feeer._hint;
+			const hint: string = feeer._hint;
 
 			if (hint.includes(HINT.CURRENCY.FEEER.NIL)) {
-				return 0;
+				return { _hint: hint, currency_id: cid, total_fee: "0" };
 			}
 
 			if (hint.includes(HINT.CURRENCY.FEEER.FIXED)) {
-				return Number(feeer.amount);
+				return { _hint: hint, currency_id: cid, total_fee: String(feeer.amount) };
 			}
 
-			if (hint.includes(HINT.CURRENCY.FEEER.FIXED_ITEM)) {
-				const opJson = isOpFact(operation)
-					? operation.toHintedObject()
-					: operation;
-				const itemCount =
-					"items" in opJson.fact && Array.isArray(opJson.fact.items)
-						? opJson.fact.items.length
-						: 1; // Default to 1 if items are not present or not an array
-				return Number(feeer.amount) + Number(feeer.item_fee_amount) * itemCount;
+			const opJson = isOpFact(operation) ? operation.toHintedObject() : operation;
+			const itemCount =
+				"items" in opJson.fact && Array.isArray(opJson.fact.items)
+					? opJson.fact.items.length
+					: 1;
+
+			if (hint.includes(HINT.CURRENCY.FEEER.FIXED_ITEM) &&
+				!hint.includes(HINT.CURRENCY.FEEER.FIXED_DETAILED)
+			) {
+				const baseFee = BigInt(feeer.amount);
+				const itemUnitFee = BigInt(feeer.item_fee_amount);
+				const itemFee = itemUnitFee * BigInt(itemCount);
+				const totalFee = baseFee + itemFee;
+				return {
+					_hint: hint,
+					currency_id: cid,
+					total_fee: String(totalFee),
+					base_fee: String(baseFee),
+					item_unit_fee: String(itemUnitFee),
+					item_count: itemCount,
+					item_fee: String(itemFee),
+				};
+			}
+
+			if (hint.includes(HINT.CURRENCY.FEEER.FIXED_DETAILED)) {
+				const fact: Fact = isOpFact(operation)
+					? operation.fact
+					: factFromJson(opJson.fact);
+				const byteLength = fact.toBytes().length;
+
+				const baseFee = BigInt(feeer.amount);
+				const itemUnitFee = BigInt(feeer.item_fee_amount);
+				const itemFee = itemUnitFee * BigInt(itemCount);
+				const dataSizeUnit = Number(feeer.data_size_unit);
+				const dataSizeUnitFee = BigInt(feeer.data_size_fee_amount);
+				const dataSizeFee = dataSizeUnitFee * BigInt(Math.ceil(byteLength / dataSizeUnit));
+				const totalFee = baseFee + itemFee + dataSizeFee;
+				return {
+					_hint: hint,
+					currency_id: cid,
+					total_fee: String(totalFee),
+					base_fee: String(baseFee),
+					item_unit_fee: String(itemUnitFee),
+					item_count: itemCount,
+					item_fee: String(itemFee),
+					data_size_unit_fee: String(dataSizeUnitFee),
+					data_size_unit: dataSizeUnit,
+					data_size: byteLength,
+					data_size_fee: String(dataSizeFee),
+				};
 			}
 
 			throw MitumError.detail(

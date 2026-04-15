@@ -216,5 +216,6 @@ export class Mitum extends Generator {
 
 export { BrowserProvider }
 export type { Item, Fact, BaseOperation, Authentication, ProxyPayer, Settlement  } from "./operation/base";
+export type { FeeEstimate } from "./operation/api";
 export type { Account, HDAccount, defaultPath } from "./key/types";
 export { isOpFact, isHintedObject, isHintedObjectFromUserOp } from "./utils/typeGuard"
