@@ -858,7 +858,7 @@ export class Contract extends KeyG {
     ) {
         Assert.check( this.api !== undefined && this.api !== null, MitumError.detail(ECODE.NO_API, "API is not provided"));
         const op = wallet.operation
-        op.sign(privatekey)
+        await op.sign(privatekey)
 
         return await new Operation(this.networkID, this.api, this.delegateIP).send(op);
     }
