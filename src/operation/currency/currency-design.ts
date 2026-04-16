@@ -163,3 +163,55 @@ export class FixedItemFeeer extends Feeer {
         return feeer
     }
 }
+
+export class FixedDetailedFeeer extends Feeer {
+    readonly receiver: Address
+    readonly amount: Big
+    readonly item_fee_amount: Big
+    readonly data_size_fee_amount: Big
+    readonly data_size_unit: Big
+    readonly execution_fee_amount: Big
+
+
+    constructor(
+        receiver: string | Address, 
+        amount: string | number | Big, 
+        item_fee_amount: string | number | Big,
+        data_size_fee_amount: string | number | Big,
+        data_size_unit: string | number | Big,
+        execution_fee_amount: string | number | Big,
+    ) {
+        super(HINT.CURRENCY.FEEER.FIXED_DETAILED)
+        this.receiver = Address.from(receiver)
+        this.amount = Big.from(amount)
+        this.item_fee_amount = Big.from(item_fee_amount)
+        this.data_size_fee_amount = Big.from(data_size_fee_amount)
+        this.data_size_unit = Big.from(data_size_unit)
+        this.execution_fee_amount = Big.from(execution_fee_amount)
+    }
+
+    toBytes(): Uint8Array {
+        return concatBytes([
+            this.receiver.toBytes(), 
+            this.amount.toBytes(),
+            this.item_fee_amount.toBytes(),
+            this.data_size_fee_amount.toBytes(),
+            this.data_size_unit.toBytes(),
+            this.execution_fee_amount.toBytes(),
+        ])
+    }
+
+    toHintedObject(): HintedObject {
+        const feeer = {
+            ...super.toHintedObject(),
+            receiver: this.receiver.toString(),
+            amount: this.amount.toString(),
+            item_fee_amount: this.item_fee_amount.toString(),
+            data_size_fee_amount: this.item_fee_amount.toString(),
+            data_size_unit: this.item_fee_amount.toString(),
+            execution_fee_amount: this.item_fee_amount.toString(),
+        }
+
+        return feeer
+    }
+}
