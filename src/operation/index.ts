@@ -352,6 +352,7 @@ export class OperationResponse extends Operation {
 	 * - `reason`: Reason for operation failure,
 	 * - `in_state`: Boolean indicating whether the operation was successful or not,
 	 * - `index`: Index of the operation in the block
+	 * - `receipt`: Receipt for the operation fee
 	 * 
 	 * **If `in_state` is `false`, the operation failed, and the `reason` property provides the failure reason.**
 	 */
