@@ -1,7 +1,7 @@
 import { CurrencyItem } from "./item"
-import { OperationFact } from "../base"
+import { CurrencyOperationFact } from "../base"
 
-import { Amount } from "../../common"
+import { Amount, CurrencyID } from "../../common"
 import { SortFunc } from "../../utils"
 import { HintedObject } from "../../types"
 import { HINT, SUFFIX } from "../../alias"
@@ -54,9 +54,9 @@ export class TransferItem extends CurrencyItem {
     }
 }
 
-export class TransferFact extends OperationFact<TransferItem> {
-    constructor(token: string, sender: string | Address, items: TransferItem[]) {
-        super(HINT.CURRENCY.TRANSFER.FACT, token, sender, items)
+export class TransferFact extends CurrencyOperationFact<TransferItem> {
+    constructor(token: string, sender: string | Address, items: TransferItem[], currency: string | CurrencyID) {
+        super(HINT.CURRENCY.TRANSFER.FACT, token, sender, items, currency)
 
         Assert.check(
             new Set(items.map(it => it.toString())).size === items.length,

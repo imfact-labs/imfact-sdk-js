@@ -87,6 +87,52 @@ export abstract class OperationFact<T extends Item> extends Fact {
     }
 }
 
+export abstract class CurrencyOperationFact<T extends Item> extends Fact {
+    readonly sender: Address
+    readonly items: T[]
+    readonly currency: CurrencyID
+
+    protected constructor(hint: string, token: string, sender: string | Address, items: T[], currency: string | CurrencyID) {
+        super(hint, token)
+        this.sender = Address.from(sender)
+        this.currency = CurrencyID.from(currency)
+
+        Assert.check(
+            Config.ITEMS_IN_FACT.satisfy(items.length),
+            MitumError.detail(ECODE.INVALID_ITEMS, "length of items is out of range")
+        )
+        
+        if (hint !== HINT.NFT.MINT.FACT) {
+            Assert.check(
+                new Set(items.map(i => i.toString())).size === items.length,
+                MitumError.detail(ECODE.INVALID_ITEMS, "duplicate items found")
+            ) 
+        }
+
+        this.items = items
+
+        this._hash = this.hashing()
+    }
+
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.sender.toBytes(),
+            this.currency.toBytes(),
+            concatBytes(this.items.map((i) => i.toBytes())),
+        ])
+    }
+
+    toHintedObject(): FactJson {
+        return {
+            ...super.toHintedObject(),
+            sender: this.sender.toString(),
+            items: this.items.map(i => i.toHintedObject()),
+            currency: this.currency.toString()
+        }
+    }
+}
+
 export abstract class ContractFact extends Fact {
     readonly sender: Address
     readonly contract: Address

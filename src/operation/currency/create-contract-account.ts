@@ -1,9 +1,9 @@
 import base58 from "bs58"
 
 import { CurrencyItem } from "./item"
-import { OperationFact } from "../base"
+import { CurrencyOperationFact } from "../base"
 
-import { Amount } from "../../common"
+import { Amount, CurrencyID } from "../../common"
 import { SortFunc } from "../../utils"
 import { HINT } from "../../alias"
 import { HintedObject } from "../../types"
@@ -38,9 +38,9 @@ export class CreateContractAccountItem extends CurrencyItem {
     }
 }
 
-export class CreateContractAccountFact extends OperationFact<CreateContractAccountItem> {
-    constructor(token: string, sender: string | Address, items: CreateContractAccountItem[]) {
-        super(HINT.CURRENCY.CREATE_CONTRACT_ACCOUNT.FACT, token, sender, items)
+export class CreateContractAccountFact extends CurrencyOperationFact<CreateContractAccountItem> {
+    constructor(token: string, sender: string | Address, items: CreateContractAccountItem[], currency: string | CurrencyID) {
+        super(HINT.CURRENCY.CREATE_CONTRACT_ACCOUNT.FACT, token, sender, items, currency)
 
         Assert.check(
             new Set(items.map(it => it.toString())).size === items.length,

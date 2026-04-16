@@ -172,6 +172,7 @@ export class Currency extends Generator {
                 [
                     new TransferItem(receiver, [new Amount(currency, amount)])
                 ],
+                currency
             ),
         )
     }
@@ -201,6 +202,7 @@ export class Currency extends Generator {
                     receiver, [new Amount(currency, amounts[idx])]
                     )
                 ),
+                currency
             ),
         )
     }
@@ -228,6 +230,7 @@ export class Currency extends Generator {
                 [
                     new WithdrawItem(target, [new Amount(currency, amount)])
                 ],
+                currency
             ),
         )
     }
@@ -255,6 +258,7 @@ export class Currency extends Generator {
                 TimeStamp.new().UTC(),
                 sender,                
                 items,
+                currency
             ),
         )
     }
@@ -362,6 +366,7 @@ export class Account extends KeyG {
                             [new Amount(currency, amount)],
                         )
                     ],
+                    currency
                 ),
             ),
         }
@@ -391,6 +396,7 @@ export class Account extends KeyG {
                     TimeStamp.new().UTC(),
                     sender,
                     items,
+                    currency
                 ),
             ),
         }
@@ -422,6 +428,7 @@ export class Account extends KeyG {
                         [new Amount(currency, amount)],
                     )
                 ],
+                currency
             )
         )
     }
@@ -468,7 +475,8 @@ export class Account extends KeyG {
                         ),
                         [new Amount(currency, amount)],
                     )
-                ]
+                ],
+                currency
             ),
         )
     }
@@ -700,6 +708,7 @@ export class Contract extends KeyG {
                             [new Amount(currency, amount)],
                         )
                     ],
+                    currency
                 ),
             ),
         }
@@ -728,7 +737,8 @@ export class Contract extends KeyG {
                 new CreateContractAccountFact(
                     TimeStamp.new().UTC(),
                     sender,
-                    items
+                    items,
+                    currency
                 ),
             ),
         }
@@ -759,6 +769,7 @@ export class Contract extends KeyG {
                         [new Amount(currency, amount)],
                     )
                 ],
+                currency
             )
         )
     }
