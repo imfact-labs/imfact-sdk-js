@@ -87,7 +87,7 @@ export abstract class OperationFact<T extends Item> extends Fact {
     }
 }
 
-export abstract class CurrencyOperationFact<T extends Item> extends Fact {
+export abstract class ItemOperationFact<T extends Item> extends Fact {
     readonly sender: Address
     readonly items: T[]
     readonly currency: CurrencyID

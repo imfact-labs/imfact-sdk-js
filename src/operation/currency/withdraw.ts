@@ -1,5 +1,5 @@
 import { CurrencyItem } from "./item"
-import { CurrencyOperationFact } from "../base"
+import { ItemOperationFact } from "../base"
 
 import { HINT } from "../../alias"
 import { Address } from "../../key/address"
@@ -36,7 +36,7 @@ export class WithdrawItem extends CurrencyItem {
     }
 }
 
-export class WithdrawFact extends CurrencyOperationFact<WithdrawItem> {
+export class WithdrawFact extends ItemOperationFact<WithdrawItem> {
     constructor(token: string, sender: string | Address, items: WithdrawItem[], currency: string | CurrencyID) {
         super(HINT.CURRENCY.WITHDRAW.FACT, token, sender, items, currency)
 

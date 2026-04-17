@@ -1,5 +1,5 @@
 import { CurrencyItem } from "./item"
-import { CurrencyOperationFact } from "../base"
+import { ItemOperationFact } from "../base"
 
 import { Amount, CurrencyID } from "../../common"
 import { SortFunc } from "../../utils"
@@ -54,7 +54,7 @@ export class TransferItem extends CurrencyItem {
     }
 }
 
-export class TransferFact extends CurrencyOperationFact<TransferItem> {
+export class TransferFact extends ItemOperationFact<TransferItem> {
     constructor(token: string, sender: string | Address, items: TransferItem[], currency: string | CurrencyID) {
         super(HINT.CURRENCY.TRANSFER.FACT, token, sender, items, currency)
 
