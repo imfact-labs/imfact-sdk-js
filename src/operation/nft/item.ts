@@ -1,18 +1,15 @@
 import { Item } from "../base"
 
 import { Address } from "../../key/address"
-import { CurrencyID } from "../../common"
 import { HintedObject } from "../../types"
 
 export abstract class NFTItem extends Item {
     readonly contract: Address
-    readonly currency: CurrencyID
 
-    protected constructor(hint: string, contract: string | Address, currency: string | CurrencyID) {
+    protected constructor(hint: string, contract: string | Address) {
         super(hint)
 
         this.contract = Address.from(contract)
-        this.currency = CurrencyID.from(currency)
     }
 
     toBytes(): Uint8Array {
@@ -23,7 +20,6 @@ export abstract class NFTItem extends Item {
         return {
             ...super.toHintedObject(),
             contract: this.contract.toString(),
-            currency: this.currency.toString(),
         }
     }
 

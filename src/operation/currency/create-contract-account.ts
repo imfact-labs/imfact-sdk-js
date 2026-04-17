@@ -1,6 +1,6 @@
 import base58 from "bs58"
 import { CurrencyItem } from "./item"
-import { CurrencyOperationFact } from "../base"
+import { ItemOperationFact } from "../base"
 
 import { Amount, CurrencyID } from "../../common"
 import { SortFunc } from "../../utils"
@@ -38,7 +38,7 @@ export class CreateContractAccountItem extends CurrencyItem {
     }
 }
 
-export class CreateContractAccountFact extends CurrencyOperationFact<CreateContractAccountItem> {
+export class CreateContractAccountFact extends ItemOperationFact<CreateContractAccountItem> {
     constructor(token: string, sender: string | Address, items: CreateContractAccountItem[], currency: string | CurrencyID) {
         super(HINT.CURRENCY.CREATE_CONTRACT_ACCOUNT.FACT, token, sender, items, currency)
 

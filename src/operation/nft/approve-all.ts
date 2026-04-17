@@ -1,5 +1,5 @@
 import { NFTItem } from "./item"
-import { OperationFact } from "../base"
+import { ItemOperationFact } from "../base"
 
 import { HINT } from "../../alias"
 import { Address } from "../../key/address"
@@ -15,12 +15,11 @@ export class ApproveAllItem extends NFTItem {
     readonly mode: "allow" | "cancel"
 
     constructor(
-        contract: string | Address, 
-        approved: string | Address, 
+        contract: string | Address,
+        approved: string | Address,
         mode: "allow" | "cancel",
-        currency: string | CurrencyID,
     ) {
-        super(HINT.NFT.APPROVE_ALL.ITEM, contract, currency)
+        super(HINT.NFT.APPROVE_ALL.ITEM, contract)
 
         this.approved = Address.from(approved)
         this.mode = mode
@@ -31,7 +30,6 @@ export class ApproveAllItem extends NFTItem {
             super.toBytes(),
             this.approved.toBytes(),
             encoder.encode(this.mode),
-            this.currency.toBytes(),
         ])
     }
 
@@ -48,9 +46,9 @@ export class ApproveAllItem extends NFTItem {
     }
 }
 
-export class ApproveAllFact extends OperationFact<ApproveAllItem> {
-    constructor(token: string, sender: string | Address, items: ApproveAllItem[]) {
-        super(HINT.NFT.APPROVE_ALL.FACT, token, sender, items)
+export class ApproveAllFact extends ItemOperationFact<ApproveAllItem> {
+    constructor(token: string, sender: string | Address, items: ApproveAllItem[], currency: string | CurrencyID) {
+        super(HINT.NFT.APPROVE_ALL.FACT, token, sender, items, currency)
 
         Assert.check(
             new Set(items.map(it => it.toString())).size === items.length,

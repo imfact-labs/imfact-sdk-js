@@ -512,38 +512,37 @@ export function factFromJson(factJson: any): Fact {
                 item.hash,
                 item.uri,
                 signersFromJson(item.creators),
-                item.currency,
             )
         )
-        return new NFTMintFact(token, factJson.sender, items)
+        return new NFTMintFact(token, factJson.sender, items, factJson.currency)
     }
 
     if (hint.includes(HINT.NFT.APPROVE_ALL.FACT)) {
         const items = (factJson.items as any[]).map(item =>
-            new ApproveAllItem(item.contract, item.approved, item.mode, item.currency)
+            new ApproveAllItem(item.contract, item.approved, item.mode)
         )
-        return new ApproveAllFact(token, factJson.sender, items)
+        return new ApproveAllFact(token, factJson.sender, items, factJson.currency)
     }
 
     if (hint.includes(HINT.NFT.APPROVE.FACT)) {
         const items = (factJson.items as any[]).map(item =>
-            new NFTApproveItem(item.contract, item.approved, item.nft_idx, item.currency)
+            new NFTApproveItem(item.contract, item.approved, item.nft_idx)
         )
-        return new NFTApproveFact(token, factJson.sender, items)
+        return new NFTApproveFact(token, factJson.sender, items, factJson.currency)
     }
 
     if (hint.includes(HINT.NFT.TRANSFER.FACT)) {
         const items = (factJson.items as any[]).map(item =>
-            new NFTTransferItem(item.contract, item.receiver, item.nft_idx, item.currency)
+            new NFTTransferItem(item.contract, item.receiver, item.nft_idx)
         )
-        return new NFTTransferFact(token, factJson.sender, items)
+        return new NFTTransferFact(token, factJson.sender, items, factJson.currency)
     }
 
     if (hint.includes(HINT.NFT.ADD_SIGNATURE.FACT)) {
         const items = (factJson.items as any[]).map(item =>
-            new AddSignatureItem(item.contract, item.nft_idx, item.currency)
+            new AddSignatureItem(item.contract, item.nft_idx)
         )
-        return new AddSignatureFact(token, factJson.sender, items)
+        return new AddSignatureFact(token, factJson.sender, items, factJson.currency)
     }
 
     // ======== PAYMENT ========

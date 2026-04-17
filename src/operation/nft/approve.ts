@@ -1,5 +1,5 @@
 import { NFTItem } from "./item"
-import { OperationFact } from "../base"
+import { ItemOperationFact } from "../base"
 
 import { HINT } from "../../alias"
 import { Address } from "../../key/address"
@@ -13,12 +13,11 @@ export class ApproveItem extends NFTItem {
     readonly nftIdx: Big
 
     constructor(
-        contract: string | Address, 
-        approved: string | Address, 
-        nftIdx: string | number | Big, 
-        currency: string | CurrencyID,
+        contract: string | Address,
+        approved: string | Address,
+        nftIdx: string | number | Big,
     ) {
-        super(HINT.NFT.APPROVE.ITEM, contract, currency)
+        super(HINT.NFT.APPROVE.ITEM, contract)
 
         this.approved = Address.from(approved)
         this.nftIdx = Big.from(nftIdx)
@@ -29,7 +28,6 @@ export class ApproveItem extends NFTItem {
             super.toBytes(),
             this.approved.toBytes(),
             this.nftIdx.toBytes("fill"),
-            this.currency.toBytes(),
         ])
     }
 
@@ -46,9 +44,9 @@ export class ApproveItem extends NFTItem {
     }
 }
 
-export class ApproveFact extends OperationFact<ApproveItem> {
-    constructor(token: string, sender: string | Address, items: ApproveItem[]) {
-        super(HINT.NFT.APPROVE.FACT, token, sender, items)
+export class ApproveFact extends ItemOperationFact<ApproveItem> {
+    constructor(token: string, sender: string | Address, items: ApproveItem[], currency: string | CurrencyID) {
+        super(HINT.NFT.APPROVE.FACT, token, sender, items, currency)
 
         Assert.check(
             new Set(items.map(it => it.toString())).size === items.length,

@@ -1,6 +1,6 @@
 import { NFTItem } from "./item"
 import { Signers } from "./signer"
-import { OperationFact } from "../base"
+import { ItemOperationFact } from "../base"
 
 import { HINT } from "../../alias"
 import { Address } from "../../key/address"
@@ -20,12 +20,11 @@ export class MintItem extends NFTItem {
     constructor(
         contract: string | Address,
         receiver: string | Address,
-        hash: string | LongString, 
+        hash: string | LongString,
         uri: string | LongString,
         creators: Signers,
-        currency: string | CurrencyID,
     ) {
-        super(HINT.NFT.MINT.ITEM, contract, currency)
+        super(HINT.NFT.MINT.ITEM, contract)
 
         Assert.check(
             Config.NFT.HASH.satisfy(hash.toString().length),
@@ -49,7 +48,6 @@ export class MintItem extends NFTItem {
             this.hash.toBytes(),
             this.uri.toBytes(),
             this.creators.toBytes(),
-            this.currency.toBytes(),
         ])
     }
 
@@ -64,9 +62,9 @@ export class MintItem extends NFTItem {
     }
 }
 
-export class MintFact extends OperationFact<MintItem> {
-    constructor(token: string, sender: string | Address, items: MintItem[]) {
-        super(HINT.NFT.MINT.FACT, token, sender, items)
+export class MintFact extends ItemOperationFact<MintItem> {
+    constructor(token: string, sender: string | Address, items: MintItem[], currency: string | CurrencyID) {
+        super(HINT.NFT.MINT.FACT, token, sender, items, currency)
 
         this.items.forEach(
             it => {

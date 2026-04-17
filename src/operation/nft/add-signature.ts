@@ -1,5 +1,5 @@
 import { NFTItem } from "./item"
-import { OperationFact } from "../base"
+import { ItemOperationFact } from "../base"
 
 import { HINT } from "../../alias"
 import { Address } from "../../key/address"
@@ -12,11 +12,10 @@ export class AddSignatureItem extends NFTItem {
     readonly nftIdx: Big
 
     constructor(
-        contract: string | Address, 
-        nftIdx: string | number | Big, 
-        currency: string | CurrencyID,
+        contract: string | Address,
+        nftIdx: string | number | Big,
     ) {
-        super(HINT.NFT.ADD_SIGNATURE.ITEM, contract, currency)
+        super(HINT.NFT.ADD_SIGNATURE.ITEM, contract)
         this.nftIdx = Big.from(nftIdx)
     }
 
@@ -24,7 +23,6 @@ export class AddSignatureItem extends NFTItem {
         return concatBytes([
             super.toBytes(),
             this.nftIdx.toBytes("fill"),
-            this.currency.toBytes(),
         ])
     }
 
@@ -36,9 +34,9 @@ export class AddSignatureItem extends NFTItem {
     }
 }
 
-export class AddSignatureFact extends OperationFact<AddSignatureItem> {
-    constructor(token: string, sender: string | Address, items: AddSignatureItem[]) {
-        super(HINT.NFT.ADD_SIGNATURE.FACT, token, sender, items)
+export class AddSignatureFact extends ItemOperationFact<AddSignatureItem> {
+    constructor(token: string, sender: string | Address, items: AddSignatureItem[], currency: string | CurrencyID) {
+        super(HINT.NFT.ADD_SIGNATURE.FACT, token, sender, items, currency)
 
         this.items.forEach(
             it => Assert.check(

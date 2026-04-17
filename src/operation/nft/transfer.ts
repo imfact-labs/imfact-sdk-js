@@ -1,5 +1,5 @@
 import { NFTItem } from "./item"
-import { OperationFact } from "../base"
+import { ItemOperationFact } from "../base"
 
 import { HINT } from "../../alias"
 import { Address } from "../../key/address"
@@ -13,12 +13,11 @@ export class TransferItem extends NFTItem {
     readonly nftIdx: Big
 
     constructor(
-        contract: string | Address, 
-        receiver: string | Address, 
-        nftIdx: string | number | Big, 
-        currency: string | CurrencyID,
+        contract: string | Address,
+        receiver: string | Address,
+        nftIdx: string | number | Big,
     ) {
-        super(HINT.NFT.TRANSFER.ITEM, contract, currency)
+        super(HINT.NFT.TRANSFER.ITEM, contract)
 
         this.receiver = Address.from(receiver)
         this.nftIdx = Big.from(nftIdx)
@@ -29,7 +28,6 @@ export class TransferItem extends NFTItem {
             super.toBytes(),
             this.receiver.toBytes(),
             this.nftIdx.toBytes("fill"),
-            this.currency.toBytes(),
         ])
     }
 
@@ -46,9 +44,9 @@ export class TransferItem extends NFTItem {
     }
 }
 
-export class TransferFact extends OperationFact<TransferItem> {
-    constructor(token: string, sender: string | Address, items: TransferItem[]) {
-        super(HINT.NFT.TRANSFER.FACT, token, sender, items)
+export class TransferFact extends ItemOperationFact<TransferItem> {
+    constructor(token: string, sender: string | Address, items: TransferItem[], currency: string | CurrencyID) {
+        super(HINT.NFT.TRANSFER.FACT, token, sender, items, currency)
 
         Assert.check(
             new Set(items.map(it => it.toString())).size === items.length,

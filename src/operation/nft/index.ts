@@ -140,8 +140,7 @@ export class NFT extends ContractGenerator {
             hash,
             uri,
             new Signers([new Signer(creator, 100, false)]),
-            currency,
-        )]))
+        )], currency))
     }
     
     /**
@@ -173,9 +172,8 @@ export class NFT extends ContractGenerator {
             hash[idx],
             uri[idx],
             new Signers([new Signer(creator, 100, false)]),
-            currency,
         ));
-        return new BaseOperation(this.networkID, new MintFact(TimeStamp.new().UTC(), sender, items))
+        return new BaseOperation(this.networkID, new MintFact(TimeStamp.new().UTC(), sender, items, currency))
     }
     
     /**
@@ -221,9 +219,9 @@ export class NFT extends ContractGenerator {
                         new Signers(
                             creators.map(a => new Signer(a.account, a.share, false)),
                         ),
-                        currency,
                     )
-                ]
+                ],
+                currency,
             )
         )
     }
@@ -252,9 +250,9 @@ export class NFT extends ContractGenerator {
                     contract,
                     receiver,
                     nftIdx,
-                    currency,
                 )
-            ]
+            ],
+            currency,
         )
 
         return new BaseOperation(this.networkID, fact)
@@ -284,13 +282,13 @@ export class NFT extends ContractGenerator {
             contractsArray[idx],
             receiver[idx],
             nftIdx[idx],
-            currency,
         ));
 
         return new BaseOperation(this.networkID, new TransferFact(
             TimeStamp.new().UTC(),
             sender,
-            items
+            items,
+            currency,
         ))
     }
     
@@ -321,9 +319,9 @@ export class NFT extends ContractGenerator {
                         contract,
                         approved,
                         nftIdx,
-                        currency,
                     )
-                ]
+                ],
+                currency,
             )
         )
     }
@@ -351,7 +349,6 @@ export class NFT extends ContractGenerator {
             contractsArray[idx],
             approved[idx],
             nftIdx[idx],
-            currency,
         ));
 
         return new BaseOperation(
@@ -359,7 +356,8 @@ export class NFT extends ContractGenerator {
             new ApproveFact(
                 TimeStamp.new().UTC(),
                 sender,
-                items
+                items,
+                currency,
             )
         )
     }
@@ -390,9 +388,9 @@ export class NFT extends ContractGenerator {
                         contract,
                         approved,
                         mode,
-                        currency,
                     )
-                ]
+                ],
+                currency,
             ),
         )
     }
@@ -420,7 +418,6 @@ export class NFT extends ContractGenerator {
             contractsArray[idx],
             approved[idx],
             mode,
-            currency,
         ));
 
         return new BaseOperation(
@@ -428,7 +425,8 @@ export class NFT extends ContractGenerator {
             new ApproveAllFact(
                 TimeStamp.new().UTC(),
                 sender,
-                items
+                items,
+                currency,
             ),
         )
     }
@@ -456,9 +454,9 @@ export class NFT extends ContractGenerator {
                     new AddSignatureItem(
                         contract,
                         nftIdx,
-                        currency,
                     )
-                ]
+                ],
+                currency,
             )
         )
     }
