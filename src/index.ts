@@ -5,8 +5,8 @@ import { Block, Node, NetworkID } from "./node"
 import { Utils } from "./utils/transformUnit"
 import { 
     Account, Currency, Contract, 
-    NFT, DAO, Credential,
-    // KYC, STO, Point,
+    NFT, DAO,
+    // Credential, KYC, STO, Point,
     TimeStamp, Token,  Storage, Payment,
     Signer
 } from "./operation"
@@ -24,8 +24,8 @@ export class Mitum extends Generator {
     private _signer: Signer
 
     private _nft: NFT
-    private _credential: Credential
     private _timestamp: TimeStamp
+    // private _credential: Credential
     // private _sto: STO
     // private _kyc: KYC
     // private _point: Point
@@ -52,8 +52,8 @@ export class Mitum extends Generator {
 
         this._contract = new Contract(this.networkID, this.api, this.delegateIP)
         this._nft = new NFT(this.networkID, this.api, this.delegateIP)
-        this._credential = new Credential(this.networkID, this.api, this.delegateIP)
         this._timestamp = new TimeStamp(this.networkID, this.api, this.delegateIP)
+        // this._credential = new Credential(this.networkID, this.api, this.delegateIP)
         // this._sto = new STO(this.networkID, this.api, this.delegateIP)
         // this._kyc = new KYC(this.networkID, this.api, this.delegateIP)
         // this._point = new Point(this.networkID, this.api, this.delegateIP)
@@ -79,8 +79,8 @@ export class Mitum extends Generator {
 
         this._contract = new Contract(this.networkID, this.api, this.delegateIP)
         this._nft = new NFT(this.networkID, this.api, this.delegateIP)
-        this._credential = new Credential(this.networkID, this.api, this.delegateIP)
         this._timestamp = new TimeStamp(this.networkID, this.api, this.delegateIP)
+        // this._credential = new Credential(this.networkID, this.api, this.delegateIP)
         // this._sto = new STO(this.networkID, this.api, this.delegateIP)
         // this._kyc = new KYC(this.networkID, this.api, this.delegateIP)
         // this._point = new Point(this.networkID, this.api, this.delegateIP)
@@ -124,13 +124,13 @@ export class Mitum extends Generator {
         return this._nft
     }
 
-    get credential(): Credential {
-        return this._credential
-    }
-
     get timestamp(): TimeStamp {
         return this._timestamp
     }
+
+    // get credential(): Credential {
+    //     return this._credential
+    // }
 
     // get sto(): STO {
     //     return this._sto
