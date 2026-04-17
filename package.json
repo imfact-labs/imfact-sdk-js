@@ -1,6 +1,6 @@
 {
   "name": "@imfact/sdk",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "framework for imfact network",
   "main": "dist/bundle.cjs.cjs",
   "module": "dist/bundle.esm.mjs",
@@ -24,6 +24,8 @@
     "mitum-token",
     "mitum-nft",
     "mitum-dao",
+    "mitum-storage",
+    "mitum-payment",
     "mitum-timestamp"
   ],
   "author": "socialinfratech",
