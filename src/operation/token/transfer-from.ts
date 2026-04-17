@@ -1,5 +1,5 @@
 import { TokenItem } from "./item"
-import { OperationFact } from "../base"
+import { ItemOperationFact } from "../base"
 
 import { Big, HintedObject } from "../../types"
 import { HINT } from "../../alias"
@@ -17,9 +17,8 @@ export class TransferFromItem extends TokenItem {
         receiver: string | Address,
         target: string | Address,
         amount: string | number | Big,
-        currency: string | CurrencyID,
     ) {
-        super(HINT.TOKEN.TRANSFER_FROM.ITEM, contract, amount, currency);
+        super(HINT.TOKEN.TRANSFER_FROM.ITEM, contract, amount);
 
         this.receiver = Address.from(receiver);
         this.target = Address.from(target);
@@ -31,7 +30,6 @@ export class TransferFromItem extends TokenItem {
             this.receiver.toBytes(),
             this.target.toBytes(),
             this.amount.toBytes(),
-            this.currency.toBytes(),
         ])
     }
 
@@ -41,7 +39,6 @@ export class TransferFromItem extends TokenItem {
             receiver: this.receiver.toString(),
             target: this.target.toString(),
             amount: this.amount.toString(),
-            currency: this.currency.toString(),
         }
     }
 
@@ -50,9 +47,9 @@ export class TransferFromItem extends TokenItem {
     }
 }
 
-export class TransferFromFact extends OperationFact<TransferFromItem> {
-    constructor(token: string, sender: string | Address, items: TransferFromItem[]) {
-        super(HINT.TOKEN.TRANSFER_FROM.FACT, token, sender, items)
+export class TransferFromFact extends ItemOperationFact<TransferFromItem> {
+    constructor(token: string, sender: string | Address, items: TransferFromItem[], currency: string | CurrencyID) {
+        super(HINT.TOKEN.TRANSFER_FROM.FACT, token, sender, items, currency)
 
         Assert.check(
             new Set(items.map(it => it.toString())).size === items.length,

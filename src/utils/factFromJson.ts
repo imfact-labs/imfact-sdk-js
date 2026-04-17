@@ -263,23 +263,23 @@ export function factFromJson(factJson: any): Fact {
     // Check TRANSFER_FROM before TRANSFER (more specific first)
     if (hint.includes(HINT.TOKEN.TRANSFER_FROM.FACT)) {
         const items = (factJson.items as any[]).map(item =>
-            new TokenTransferFromItem(item.contract, item.receiver, item.target, item.amount, item.currency)
+            new TokenTransferFromItem(item.contract, item.receiver, item.target, item.amount)
         )
-        return new TokenTransferFromFact(token, factJson.sender, items)
+        return new TokenTransferFromFact(token, factJson.sender, items, factJson.currency)
     }
 
     if (hint.includes(HINT.TOKEN.TRANSFER.FACT)) {
         const items = (factJson.items as any[]).map(item =>
-            new TokenTransferItem(item.contract, item.receiver, item.amount, item.currency)
+            new TokenTransferItem(item.contract, item.receiver, item.amount)
         )
-        return new TokenTransferFact(token, factJson.sender, items)
+        return new TokenTransferFact(token, factJson.sender, items, factJson.currency)
     }
 
     if (hint.includes(HINT.TOKEN.APPROVE.FACT)) {
         const items = (factJson.items as any[]).map(item =>
-            new TokenApproveItem(item.contract, item.approved, item.amount, item.currency)
+            new TokenApproveItem(item.contract, item.approved, item.amount)
         )
-        return new TokenApproveFact(token, factJson.sender, items)
+        return new TokenApproveFact(token, factJson.sender, items, factJson.currency)
     }
 
     // ======== STORAGE ========
@@ -296,16 +296,16 @@ export function factFromJson(factJson: any): Fact {
 
     if (hint.includes(HINT.STORAGE.CREATE_DATA.FACT)) {
         const items = (factJson.items as any[]).map(item =>
-            new CreateDataItem(item.contract, item.currency, item.dataKey, item.dataValue)
+            new CreateDataItem(item.contract, item.dataKey, item.dataValue)
         )
-        return new CreateDataFact(token, factJson.sender, items)
+        return new CreateDataFact(token, factJson.sender, items, factJson.currency)
     }
 
     if (hint.includes(HINT.STORAGE.UPDATE_DATA.FACT)) {
         const items = (factJson.items as any[]).map(item =>
-            new UpdateDataItem(item.contract, item.currency, item.dataKey, item.dataValue)
+            new UpdateDataItem(item.contract, item.dataKey, item.dataValue)
         )
-        return new UpdateDataFact(token, factJson.sender, items)
+        return new UpdateDataFact(token, factJson.sender, items, factJson.currency)
     }
 
     if (hint.includes(HINT.STORAGE.DELETE_DATA.FACT)) {

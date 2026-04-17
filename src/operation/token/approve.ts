@@ -1,5 +1,5 @@
 import { TokenItem } from "./item"
-import { OperationFact } from "../base"
+import { ItemOperationFact } from "../base"
 
 import { Big, HintedObject } from "../../types"
 import { HINT } from "../../alias"
@@ -14,10 +14,9 @@ export class ApproveItem extends TokenItem {
     constructor(
         contract: string | Address,
         approved: string | Address,
-        amount: string | number | Big, 
-        currency: string | CurrencyID,
+        amount: string | number | Big,
     ) {
-        super(HINT.TOKEN.APPROVE.ITEM, contract, amount, currency);
+        super(HINT.TOKEN.APPROVE.ITEM, contract, amount);
 
         this.approved = Address.from(approved);
     }
@@ -27,7 +26,6 @@ export class ApproveItem extends TokenItem {
             super.toBytes(),
             this.approved.toBytes(),
             this.amount.toBytes(),
-            this.currency.toBytes(),
         ])
     }
 
@@ -36,7 +34,6 @@ export class ApproveItem extends TokenItem {
             ...super.toHintedObject(),
             approved: this.approved.toString(),
             amount: this.amount.toString(),
-            currency: this.currency.toString(),
         }
     }
 
@@ -45,9 +42,9 @@ export class ApproveItem extends TokenItem {
     }
 }
 
-export class ApproveFact extends OperationFact<ApproveItem> {
-    constructor(token: string, sender: string | Address, items: ApproveItem[]) {
-        super(HINT.TOKEN.APPROVE.FACT, token, sender, items)
+export class ApproveFact extends ItemOperationFact<ApproveItem> {
+    constructor(token: string, sender: string | Address, items: ApproveItem[], currency: string | CurrencyID) {
+        super(HINT.TOKEN.APPROVE.FACT, token, sender, items, currency)
 
         Assert.check(
             new Set(items.map(it => it.toString())).size === items.length,

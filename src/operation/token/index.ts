@@ -134,7 +134,6 @@ export class Token extends ContractGenerator {
             contract,
             receiver,
             amount,
-            currency,
         );
 
         return new BaseOperation(
@@ -142,7 +141,8 @@ export class Token extends ContractGenerator {
             new TransferFact(
                 TimeStamp.new().UTC(),
                 sender,
-                [item]
+                [item],
+                currency,
             )
         )
     }
@@ -170,7 +170,6 @@ export class Token extends ContractGenerator {
             contractsArray[idx],
             receiver[idx],
             amount[idx],
-            currency,
         ));
 
         return new BaseOperation(
@@ -178,7 +177,8 @@ export class Token extends ContractGenerator {
             new TransferFact(
                 TimeStamp.new().UTC(),
                 sender,
-                items
+                items,
+                currency,
             )
         )
     }
@@ -206,15 +206,15 @@ export class Token extends ContractGenerator {
             receiver,
             target,
             amount,
-            currency,
         );
-        
+
         return new BaseOperation(
             this.networkID,
             new TransferFromFact(
                 TimeStamp.new().UTC(),
                 sender,
-                [item]
+                [item],
+                currency,
             )
         )
     }
@@ -248,15 +248,15 @@ export class Token extends ContractGenerator {
             receiver[idx],
             target[idx],
             amount[idx],
-            currency,
         ));
-    
+
         return new BaseOperation(
             this.networkID,
             new TransferFromFact(
                 TimeStamp.new().UTC(),
                 sender,
-                items
+                items,
+                currency,
             )
         )
     }
@@ -281,7 +281,6 @@ export class Token extends ContractGenerator {
             contract,
             approved,
             amount,
-            currency,
         );
 
         return new BaseOperation(
@@ -289,7 +288,8 @@ export class Token extends ContractGenerator {
             new ApproveFact(
                 TimeStamp.new().UTC(),
                 sender,
-                [item]
+                [item],
+                currency,
             )
         )
     }
@@ -317,7 +317,6 @@ export class Token extends ContractGenerator {
             contractsArray[idx],
             approved[idx],
             amount[idx],
-            currency,
         ));
 
         return new BaseOperation(
@@ -325,7 +324,8 @@ export class Token extends ContractGenerator {
             new ApproveFact(
                 TimeStamp.new().UTC(),
                 sender,
-                items
+                items,
+                currency,
             )
         )
     }

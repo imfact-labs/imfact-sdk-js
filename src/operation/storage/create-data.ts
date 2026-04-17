@@ -5,20 +5,18 @@ import type { HintedObject } from "../../types"
 import { LongString, URIString } from "../../types"
 import { CurrencyID } from "../../common"
 import { Assert, ECODE, MitumError } from "../../error"
-import { Item, OperationFact } from "../base"
+import { Item, ItemOperationFact } from "../base"
 import { concatBytes } from "../../utils/bytes"
 
 export class CreateDataItem extends Item {
     readonly contract: Address
-    readonly currency: CurrencyID
     readonly dataKey: URIString
     readonly dataValue: LongString
 
-    constructor(contract: string | Address, currency: string | CurrencyID, dataKey: string, dataValue: string | LongString) {
+    constructor(contract: string | Address, dataKey: string, dataValue: string | LongString) {
         super(HINT.STORAGE.CREATE_DATA.ITEM)
 
         this.contract = Address.from(contract)
-        this.currency = CurrencyID.from(currency)
         this.dataKey = new URIString(dataKey, "dataKey");
         this.dataValue = LongString.from(dataValue)
 
@@ -37,7 +35,6 @@ export class CreateDataItem extends Item {
             this.contract.toBytes(),
             this.dataKey.toBytes(),
             this.dataValue.toBytes(),
-            this.currency.toBytes(),
         ])
     }
 
@@ -47,7 +44,6 @@ export class CreateDataItem extends Item {
             contract: this.contract.toString(),
             dataKey: this.dataKey.toString(),
             dataValue: this.dataValue.toString(),
-            currency: this.currency.toString(),
         }
     }
 
@@ -56,9 +52,9 @@ export class CreateDataItem extends Item {
     }
 }
 
-export class CreateDataFact extends OperationFact<CreateDataItem> {
-    constructor(token: string, sender: string | Address, items: CreateDataItem[]) {
-        super(HINT.STORAGE.CREATE_DATA.FACT, token, sender, items)
+export class CreateDataFact extends ItemOperationFact<CreateDataItem> {
+    constructor(token: string, sender: string | Address, items: CreateDataItem[], currency: string | CurrencyID) {
+        super(HINT.STORAGE.CREATE_DATA.FACT, token, sender, items, currency)
 
         this.items.forEach(
             it => {

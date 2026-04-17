@@ -66,7 +66,6 @@ export class Storage extends ContractGenerator {
     ) {
         const item = new CreateDataItem(
             contract,
-            currency,
             dataKey,
             dataValue
         );
@@ -74,7 +73,8 @@ export class Storage extends ContractGenerator {
         const fact = new CreateDataFact(
             TS.new().UTC(),
             sender,
-            [item]
+            [item],
+            currency,
         )
 
         return new BaseOperation(this.networkID, fact)
@@ -103,11 +103,10 @@ export class Storage extends ContractGenerator {
         const contractsArray = convertToArray(contract, dataKeys.length);
         const items = dataKeys.map((_, idx) => new CreateDataItem(
             contractsArray[idx],
-            currency,
             dataKeys[idx],
             dataValues[idx]
         ));
-        return new BaseOperation(this.networkID, new CreateDataFact(TS.new().UTC(), sender, items))
+        return new BaseOperation(this.networkID, new CreateDataFact(TS.new().UTC(), sender, items, currency))
     }
 
     /**
@@ -128,7 +127,6 @@ export class Storage extends ContractGenerator {
     ) {
         const item = new UpdateDataItem(
             contract,
-            currency,
             dataKey,
             dataValue
         );
@@ -136,7 +134,8 @@ export class Storage extends ContractGenerator {
         const fact = new UpdateDataFact(
             TS.new().UTC(),
             sender,
-            [item]
+            [item],
+            currency,
         )
 
         return new BaseOperation(this.networkID, fact)
@@ -165,11 +164,10 @@ export class Storage extends ContractGenerator {
         const contractsArray = convertToArray(contract, dataKeys.length);
         const items = dataKeys.map((_, idx) => new UpdateDataItem(
             contractsArray[idx],
-            currency,
             dataKeys[idx],
             dataValues[idx]
         ));
-        return new BaseOperation(this.networkID, new UpdateDataFact(TS.new().UTC(), sender, items))
+        return new BaseOperation(this.networkID, new UpdateDataFact(TS.new().UTC(), sender, items, currency))
     }
     
     /**
