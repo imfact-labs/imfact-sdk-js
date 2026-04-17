@@ -1,6 +1,6 @@
 {
   "name": "@imfact/account-abstraction",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "framework for mitum network",
   "main": "dist/bundle.cjs.cjs",
   "module": "dist/bundle.esm.mjs",
@@ -17,7 +17,8 @@
   },
   "keywords": [
     "mitum",
-    "mitum-account-abstraction"
+    "mitum-account-abstraction",
+    "mitum-did"
   ],
   "author": "socialinfratech",
   "license": "GPL-3.0-or-later",
