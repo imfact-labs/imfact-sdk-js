@@ -130,18 +130,19 @@ export class BrowserProvider {
 
     /**
      * Requests the wallet to sign a personal message with the selected account.
-     * This will trigger a signing confirmation prompt from the wallet.
      * @param personalMsg - Message to sign (non-empty string).
-     * @returns Promise resolving to the signature string.
+     * @returns Promise resolving to the signed message and signer info.
      * @throws {Error} If the message is empty or signing fails/rejected.
      * @example
-     * const sig = await provider.signMessage("Hello, ImFact!");
+     * const { signedMsg, signer } = await provider.signMessage("Hello, ImFact!");
      */
-    async signMessage(personalMsg: string): Promise<string> {
+    async signMessage(
+        personalMsg: string,
+    ): Promise<{ signedMsg: string; signer: { address: string; publickey: string } }> {
         if (!personalMsg) {
             throw new Error('A message to sign is required.');
         }
-        return this.request<string>({
+        return this.request<{ signedMsg: string; signer: { address: string; publickey: string } }>({
             method: 'imfact_signMessage',
             params: [personalMsg],
         });
