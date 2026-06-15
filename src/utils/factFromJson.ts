@@ -76,6 +76,13 @@ import { TransferFromFact as PointTransferFromFact, TransferFromItem as PointTra
 import { RegisterModelFact as TimestampRegisterModelFact } from "../operation/timestamp/resgister-model"
 import { IssueFact as TimestampIssueFact } from "../operation/timestamp/issue"
 
+// ── DID ──────────────────────────────────────────────────────────────────
+import { RegisterModelFact as DIDRegisterModelFact } from "../operation/did/register-model"
+import { CreateFact as DIDCreateFact } from "../operation/did/create-did"
+import { UpdateDocumentFact as DIDUpdateDocumentFact } from "../operation/did/update-did-document"
+import { Document, AsymKeyAuth, LinkedAuth, Service } from "../operation/did/document"
+import { AllowedOperation } from "../operation/base"
+
 /**
  * Decodes the base64-encoded token back to the raw token string.
  *
@@ -154,6 +161,33 @@ function proposalFromJson(json: any): CryptoProposal | BizProposal {
     }
     // BizProposal
     return new BizProposal(json.proposer, json.start_time, json.url, json.hash, json.options)
+}
+
+/** Reconstruct a DID authentication entry (AsymKeyAuth or LinkedAuth) from its JSON. */
+function didAuthFromJson(json: any): AsymKeyAuth | LinkedAuth {
+    if (json.type === "LinkedVerificationMethod") {
+        return new LinkedAuth(
+            json.id,
+            json.controller,
+            json.targetId,
+            (json.allowed as any[]).map(a => new AllowedOperation(a.operation, a.contract)),
+        )
+    }
+    // AsymKeyAuth: type is one of the verification key types; publicKey comes from publicKeyImFact
+    return new AsymKeyAuth(json.id, json.type, json.controller, json.publicKeyImFact)
+}
+
+/** Reconstruct a DID Document from its toHintedObject() JSON. */
+function documentFromJson(json: any): Document {
+    return new Document(
+        json["@context"],
+        json.id,
+        (json.authentication as any[]).map(didAuthFromJson),
+        (json.verificationMethod as any[]).map(didAuthFromJson),
+        json.service && (json.service as any[]).length > 0
+            ? (json.service as any[]).map(s => new Service(s.id, s.type, s.service_end_point))
+            : undefined,
+    )
 }
 
 /**
@@ -691,6 +725,38 @@ export function factFromJson(factJson: any): Fact {
             factJson.project_id,
             factJson.request_timestamp,
             factJson.data,
+            factJson.currency,
+        )
+    }
+
+    // ======== DID ========
+
+    if (hint.includes(HINT.DID.REGISTER_MODEL.FACT)) {
+        return new DIDRegisterModelFact(
+            token,
+            factJson.sender,
+            factJson.contract,
+            factJson.didMethod,
+            factJson.currency,
+        )
+    }
+
+    if (hint.includes(HINT.DID.CREATE_DID.FACT)) {
+        return new DIDCreateFact(
+            token,
+            factJson.sender,
+            factJson.contract,
+            factJson.currency,
+        )
+    }
+
+    if (hint.includes(HINT.DID.UPDATE_DID_DOCUMENT.FACT)) {
+        return new DIDUpdateDocumentFact(
+            token,
+            factJson.sender,
+            factJson.contract,
+            factJson.did,
+            documentFromJson(factJson.document),
             factJson.currency,
         )
     }
