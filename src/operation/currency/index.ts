@@ -4,6 +4,7 @@ import { TransferItem, TransferFact } from "./transfer"
 import { CreateContractAccountItem, CreateContractAccountFact } from "./create-contract-account"
 import { WithdrawItem, WithdrawFact } from "./withdraw"
 import { UpdateHandlerFact } from "./update-handler"
+import { UpdateRecipientFact } from "./update-recipient"
 import { RegisterCurrencyFact } from "./register-currency"
 import { UpdateCurrencyFact } from "./update-currency"
 import { MintFact } from "./mint"
@@ -825,6 +826,32 @@ export class Contract extends KeyG {
                 contract,
                 currency,
                 handlers,
+            )
+        );
+    }
+
+    /**
+     * Generate an `update-recipient` operation to update recipients of contract to given accounts.
+     * @param {string | Address} [sender] - The sender's address.
+     * @param {string | Address} [contract] - The contract account address.
+     * @param {string | CurrencyID} [currency] - The currency ID.
+     * @param {(string | Address)[]} [recipients] - The array of addresses to be updated as recipients.
+     * @returns `update-recipient` operation.
+     */
+    updateRecipient(
+        sender: string | Address,
+        contract: string | Address,
+        currency: string | CurrencyID,
+        recipients: (string | Address)[],
+    ) {
+        return new BaseOperation(
+            this.networkID,
+            new UpdateRecipientFact(
+                TimeStamp.new().UTC(),
+                sender,
+                contract,
+                currency,
+                recipients,
             )
         );
     }

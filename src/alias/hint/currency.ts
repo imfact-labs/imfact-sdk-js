@@ -50,6 +50,10 @@ export default {
         FACT: "mitum-extension-update-handler-operation-fact",
         OPERATION: "mitum-extension-update-handler-operation",
     },
+    UPDATE_RECIPIENT: {
+        FACT: "mitum-extension-update-recipient-operation-fact",
+        OPERATION: "mitum-extension-update-recipient-operation",
+    },
     EXTENSION: {
         AUTHENTICATION: "mitum-extension-base-authentication",
         PROXY_PAYER: "mitum-extension-base-proxy-payer",

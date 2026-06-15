@@ -11,6 +11,7 @@ import { CreateAccountFact, CreateAccountItem } from "../operation/currency/crea
 import { CreateContractAccountFact, CreateContractAccountItem } from "../operation/currency/create-contract-account"
 import { UpdateKeyFact } from "../operation/currency/update-key"
 import { UpdateHandlerFact } from "../operation/currency/update-handler"
+import { UpdateRecipientFact } from "../operation/currency/update-recipient"
 
 // ── Token ──────────────────────────────────────────────────────────────
 import { RegisterModelFact as TokenRegisterModelFact } from "../operation/token/register-model"
@@ -221,6 +222,16 @@ export function factFromJson(factJson: any): Fact {
             factJson.contract,
             factJson.currency,
             factJson.handlers,
+        )
+    }
+
+    if (hint.includes(HINT.CURRENCY.UPDATE_RECIPIENT.FACT)) {
+        return new UpdateRecipientFact(
+            token,
+            factJson.sender,
+            factJson.contract,
+            factJson.currency,
+            factJson.recipients,
         )
     }
 
