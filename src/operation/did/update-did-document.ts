@@ -2,7 +2,7 @@ import { HINT } from "../../alias"
 import { Address } from "../../key"
 import { LongString } from "../../types"
 import { CurrencyID } from "../../common"
-import { ContractFact, FactJson } from "../base"
+import { ContractFact, HintedFactObject } from "../base"
 import { Document } from "./document"
 import { concatBytes } from "../../utils/bytes"
 
@@ -34,7 +34,7 @@ export class UpdateDocumentFact extends ContractFact {
         ])
     }
 
-    toHintedObject(): FactJson {
+    toHintedObject(): HintedFactObject {
         return {
             ...super.toHintedObject(),
             did: this.did.toString(),

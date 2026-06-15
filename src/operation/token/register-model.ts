@@ -1,5 +1,5 @@
 import { TokenFact } from "./fact"
-import type { FactJson } from "../base"
+import type { HintedFactObject } from "../base"
 import { HINT } from "../../alias"
 import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
@@ -51,7 +51,7 @@ export class RegisterModelFact extends TokenFact {
         ])
     }
 
-    toHintedObject(): FactJson {
+    toHintedObject(): HintedFactObject {
         return {
             ...super.toHintedObject(),
             symbol:  this.symbol.toString(),

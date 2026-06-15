@@ -2,7 +2,7 @@ import { HINT } from "../../alias"
 import { Address } from "../../key"
 import { LongString } from "../../types"
 import { CurrencyID } from "../../common"
-import { ContractFact, FactJson } from "../base"
+import { ContractFact, HintedFactObject } from "../base"
 import { concatBytes } from "../../utils/bytes"
 
 
@@ -30,7 +30,7 @@ export class RegisterModelFact extends ContractFact {
         ])
     }
 
-    toHintedObject(): FactJson {
+    toHintedObject(): HintedFactObject {
         return {
             ...super.toHintedObject(),
             didMethod: this.didMethod.toString(),

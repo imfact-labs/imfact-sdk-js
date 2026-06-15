@@ -1,5 +1,5 @@
 import { TokenFact } from "./fact"
-import { FactJson } from "../base"
+import { HintedFactObject } from "../base"
 
 import { Big } from "../../types"
 import { HINT } from "../../alias"
@@ -45,7 +45,7 @@ export class BurnFact extends TokenFact {
         ])
     }
 
-    toHintedObject(): FactJson {
+    toHintedObject(): HintedFactObject {
         return {
             ...super.toHintedObject(),
             target:  this.target.toString(),

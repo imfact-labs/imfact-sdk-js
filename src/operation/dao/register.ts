@@ -1,5 +1,5 @@
 import { DAOFact } from "./fact"
-import { FactJson } from "../base"
+import { HintedFactObject } from "../base"
 
 import { HINT } from "../../alias"
 import { Address } from "../../key/address"
@@ -37,7 +37,7 @@ export class RegisterFact extends DAOFact {
         ])
     }
 
-    toHintedObject(): FactJson {
+    toHintedObject(): HintedFactObject {
         return {
             ...super.toHintedObject(),
             approved: this.approved.toString(),

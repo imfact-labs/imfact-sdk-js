@@ -1,4 +1,4 @@
-import { ContractFact, FactJson } from "../base"
+import { ContractFact, HintedFactObject } from "../base"
 import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
 import { concatBytes } from "../../utils/bytes"
@@ -21,7 +21,7 @@ export abstract class PointFact extends ContractFact {
         ])
     }
 
-    toHintedObject(): FactJson {
+    toHintedObject(): HintedFactObject {
         return {
             ...super.toHintedObject(),
         }

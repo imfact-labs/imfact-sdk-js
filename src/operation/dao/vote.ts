@@ -1,5 +1,5 @@
 import { DAOFact } from "./fact"
-import { FactJson } from "../base"
+import { HintedFactObject } from "../base"
 
 import { Big } from "../../types"
 import { HINT } from "../../alias"
@@ -37,7 +37,7 @@ export class VoteFact extends DAOFact {
         ])
     }
 
-    toHintedObject(): FactJson {
+    toHintedObject(): HintedFactObject {
         return {
             ...super.toHintedObject(),
             vote_option: this.vote.v,

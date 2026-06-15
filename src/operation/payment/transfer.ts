@@ -1,5 +1,5 @@
 import { PaymentFact } from "./fact"
-import { FactJson } from "../base"
+import { HintedFactObject } from "../base"
 import { HINT } from "../../alias"
 import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
@@ -34,7 +34,7 @@ export class TransferFact extends PaymentFact {
         ])
     }
 
-    toHintedObject(): FactJson {
+    toHintedObject(): HintedFactObject {
         return {
             ...super.toHintedObject(),
             receiver: this.receiver.toString(),

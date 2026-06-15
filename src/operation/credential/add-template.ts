@@ -1,4 +1,4 @@
-import { ContractFact, FactJson } from "../base"
+import { ContractFact, HintedFactObject } from "../base"
 import { HINT } from "../../alias"
 import { Config } from "../../node"
 import { Address } from "../../key/address"
@@ -111,7 +111,7 @@ export class AddTemplateFact extends ContractFact {
         ]);
     }
 
-    toHintedObject(): FactJson {
+    toHintedObject(): HintedFactObject {
         return {
             ...super.toHintedObject(),
             template_id: this.templateID.toString(),

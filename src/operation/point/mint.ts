@@ -1,5 +1,5 @@
 import { PointFact } from "./fact"
-import { FactJson } from "../base"
+import { HintedFactObject } from "../base"
 
 import { Big } from "../../types"
 import { HINT } from "../../alias"
@@ -45,7 +45,7 @@ export class MintFact extends PointFact {
         ])
     }
 
-    toHintedObject(): FactJson {
+    toHintedObject(): HintedFactObject {
         return {
             ...super.toHintedObject(),
             receiver:  this.receiver.toString(),

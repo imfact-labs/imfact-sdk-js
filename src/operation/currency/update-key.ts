@@ -1,4 +1,4 @@
-import { Fact, FactJson } from "../base"
+import { Fact, HintedFactObject } from "../base"
 
 import { HINT } from "../../alias"
 import { CurrencyID } from "../../common"
@@ -28,7 +28,7 @@ export class UpdateKeyFact extends Fact {
         ])
     }
 
-    toHintedObject(): FactJson {
+    toHintedObject(): HintedFactObject {
         return {
             ...super.toHintedObject(),
             sender: this.sender.toString(),

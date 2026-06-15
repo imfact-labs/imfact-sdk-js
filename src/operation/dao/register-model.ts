@@ -1,4 +1,4 @@
-import { ContractFact, FactJson } from "../base"
+import { ContractFact, HintedFactObject } from "../base"
 import { HINT } from "../../alias"
 import { Address } from "../../key/address"
 import { CurrencyID, Hint } from "../../common"
@@ -44,7 +44,7 @@ export class RegisterModelFact extends ContractFact {
         ])
     }
 
-    toHintedObject(): FactJson {
+    toHintedObject(): HintedFactObject {
         return {
             ...super.toHintedObject(),
             option: this.option,

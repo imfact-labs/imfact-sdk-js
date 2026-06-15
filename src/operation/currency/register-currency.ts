@@ -1,5 +1,5 @@
 import { CurrencyDesign } from "./currency-design"
-import { NodeFact, FactJson } from "../base"
+import { NodeFact, HintedFactObject } from "../base"
 import { HINT } from "../../alias"
 import { concatBytes } from "../../utils/bytes"
 
@@ -19,7 +19,7 @@ export class RegisterCurrencyFact extends NodeFact {
         ])
     }
 
-    toHintedObject(): FactJson {
+    toHintedObject(): HintedFactObject {
         return {
             ...super.toHintedObject(),
             currency: this.design.toHintedObject(),

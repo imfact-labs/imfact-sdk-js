@@ -1,4 +1,4 @@
-import { NodeFact, FactJson } from "../base"
+import { NodeFact, HintedFactObject } from "../base"
 
 import { HINT } from "../../alias"
 import { Address } from "../../key/address"
@@ -25,7 +25,7 @@ export class MintFact extends NodeFact {
         ])
     }
 
-    toHintedObject(): FactJson {
+    toHintedObject(): HintedFactObject {
         return {
             ...super.toHintedObject(),
             receiver: this.receiver.toString(),

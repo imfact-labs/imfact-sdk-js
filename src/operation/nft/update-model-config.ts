@@ -1,4 +1,4 @@
-import { ContractFact, FactJson } from "../base"
+import { ContractFact, HintedFactObject } from "../base"
 
 import { HINT } from "../../alias"
 import { Config } from "../../node"
@@ -62,7 +62,7 @@ export class UpdateModelConfigFact extends ContractFact {
         ])
     }
 
-    toHintedObject(): FactJson {
+    toHintedObject(): HintedFactObject {
         return {
             ...super.toHintedObject(),
             name: this.name.toString(),

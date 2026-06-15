@@ -1,6 +1,6 @@
 import base58 from "bs58"
 import { Item } from "./item"
-import { FactJson } from "./types"
+import { HintedFactObject } from "./types"
 import { HINT } from "../../alias"
 import { Config } from "../../node"
 import { Address } from "../../key/address"
@@ -34,7 +34,7 @@ export abstract class Fact implements IBytes, IHintedObject {
         return this.token.toBytes()
     }
 
-    toHintedObject(): FactJson {
+    toHintedObject(): HintedFactObject {
         return {
             _hint: this.hint.toString(),
             hash: base58.encode(this.hash ? this.hash : []),
@@ -78,7 +78,7 @@ export abstract class OperationFact<T extends Item> extends Fact {
         ])
     }
 
-    toHintedObject(): FactJson {
+    toHintedObject(): HintedFactObject {
         return {
             ...super.toHintedObject(),
             sender: this.sender.toString(),
@@ -123,7 +123,7 @@ export abstract class ItemOperationFact<T extends Item> extends Fact {
         ])
     }
 
-    toHintedObject(): FactJson {
+    toHintedObject(): HintedFactObject {
         return {
             ...super.toHintedObject(),
             sender: this.sender.toString(),
@@ -159,7 +159,7 @@ export abstract class ContractFact extends Fact {
         ])
     }
 
-    toHintedObject(): FactJson {
+    toHintedObject(): HintedFactObject {
         return {
             ...super.toHintedObject(),
             sender: this.sender.toString(),

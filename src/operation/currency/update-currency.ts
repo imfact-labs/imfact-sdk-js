@@ -1,5 +1,5 @@
 import { CurrencyPolicy } from "./currency-design"
-import { FactJson, NodeFact } from "../base"
+import { HintedFactObject, NodeFact } from "../base"
 
 import { HINT } from "../../alias"
 import { CurrencyID } from "../../common"
@@ -24,7 +24,7 @@ export class UpdateCurrencyFact extends NodeFact {
         ])
     }
 
-    toHintedObject(): FactJson {
+    toHintedObject(): HintedFactObject {
         return {
             ...super.toHintedObject(),
             currency: this.currency.toString(),

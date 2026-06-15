@@ -1,4 +1,4 @@
-import { ContractFact, FactJson } from "../base"
+import { ContractFact, HintedFactObject } from "../base"
 
 import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
@@ -27,7 +27,7 @@ export abstract class DAOFact extends ContractFact {
         ])
     }
 
-    toHintedObject(): FactJson {
+    toHintedObject(): HintedFactObject {
         return {
             ...super.toHintedObject(),
             proposal_id: this.proposalID.toString(),

@@ -1,4 +1,4 @@
-import { FactJson } from "../base"
+import { HintedFactObject } from "../base"
 import { PaymentFact } from "./fact"
 import { Big } from "../../types"
 import { HINT } from "../../alias"
@@ -53,7 +53,7 @@ export class UpdateFact extends PaymentFact {
         ])
     }
 
-    toHintedObject(): FactJson {
+    toHintedObject(): HintedFactObject {
         return {
             ...super.toHintedObject(),
             transfer_limit: this.transfer_limit.toString(),

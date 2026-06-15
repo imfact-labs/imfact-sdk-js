@@ -1,4 +1,4 @@
-import type { FactJson } from "../base"
+import type { HintedFactObject } from "../base"
 import { StorageFact } from "./fact"
 import type { LongString } from "../../types"
 import { HINT } from "../../alias"
@@ -33,7 +33,7 @@ export class DeleteDataFact extends StorageFact {
         ])
     }
 
-    toHintedObject(): FactJson {
+    toHintedObject(): HintedFactObject {
         return {
             ...super.toHintedObject(),
         }

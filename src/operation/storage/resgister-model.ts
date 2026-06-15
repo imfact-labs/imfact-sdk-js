@@ -2,7 +2,7 @@ import { HINT } from "../../alias"
 import type { Address } from "../../key/address"
 import { LongString } from "../../types"
 import type { CurrencyID } from "../../common"
-import { ContractFact, FactJson } from "../base"
+import { ContractFact, HintedFactObject } from "../base"
 import { Config } from "../../node"
 import { Assert, ECODE, MitumError } from "../../error"
 import { concatBytes } from "../../utils/bytes"
@@ -35,7 +35,7 @@ export class RegisterModelFact extends ContractFact {
         ])
     }
 
-    toHintedObject(): FactJson {
+    toHintedObject(): HintedFactObject {
         return {
             ...super.toHintedObject(),
             project:  this.project.toString(),

@@ -1,4 +1,7 @@
-type FS = {
+import { HintedFactObject } from "../../types"
+export { HintedFactObject }
+
+export type FS = {
     node?: string,
     signer: string,
     signed_at: string,
@@ -18,20 +21,13 @@ export type NodeFS = {
     signature: string,
 }
 
-export type FactJson = {
-    _hint: string,
-    token: string,
-    hash: string,
-    [i: string]: any,
-}
-
 export type Allowed =
     | { operation: string }
     | { operation: string; contract: string };
 
 export type OperationJson = {
     _hint: string,
-    fact: FactJson,
+    fact: HintedFactObject,
     hash: string,
     signs: FS[]
 }
@@ -55,7 +51,7 @@ type SettlementJson = {
 
 export type UserOperationJson = {
     _hint: string,
-    fact: FactJson,
+    fact: HintedFactObject,
     extension: {
         authentication: AuthJson,
         proxy_payer?: ProxyPayerJson,

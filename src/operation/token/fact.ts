@@ -1,5 +1,5 @@
 import { ContractFact } from "../base"
-import type { FactJson } from "../base"
+import type { HintedFactObject } from "../base"
 import { Address } from "../../key/address"
 import { CurrencyID } from "../../common"
 import { concatBytes } from "../../utils/bytes"
@@ -22,7 +22,7 @@ export abstract class TokenFact extends ContractFact {
         ])
     }
 
-    toHintedObject(): FactJson {
+    toHintedObject(): HintedFactObject {
         return {
             ...super.toHintedObject(),
         }

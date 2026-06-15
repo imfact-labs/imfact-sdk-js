@@ -1,4 +1,4 @@
-import type { FactJson } from "../base"
+import type { HintedFactObject } from "../base"
 import { ContractFact } from "../base"
 import { Big } from "../../types"
 import { HINT } from "../../alias"
@@ -52,7 +52,7 @@ export class IssueFact extends ContractFact {
         ])
     }
 
-    toHintedObject(): FactJson {
+    toHintedObject(): HintedFactObject {
         return {
             ...super.toHintedObject(),
             project_id: this.projectID,

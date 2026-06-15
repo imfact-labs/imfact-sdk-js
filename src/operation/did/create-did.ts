@@ -1,7 +1,7 @@
 import { HINT } from "../../alias"
 import { Address } from "../../key"
 import { CurrencyID } from "../../common"
-import { ContractFact, FactJson } from "../base"
+import { ContractFact, HintedFactObject } from "../base"
 import { concatBytes } from "../../utils/bytes"
 
 export class CreateFact extends ContractFact {
@@ -22,7 +22,7 @@ export class CreateFact extends ContractFact {
         ])
     }
 
-    toHintedObject(): FactJson {
+    toHintedObject(): HintedFactObject {
         return {
             ...super.toHintedObject(),
         }
