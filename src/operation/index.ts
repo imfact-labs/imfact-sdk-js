@@ -10,8 +10,10 @@ import { Point } from "./point"
 import { Storage } from "./storage"
 import { Payment } from "./payment"
 import { Signer } from "./signer"
+import { Did } from "./did"
 
 import * as Base from "./base"
+import { allowedOperation } from "./allowed"
 
 export {
 	Currency, Account, Contract,
@@ -26,5 +28,7 @@ export {
 	Storage,
 	Payment,
 	Signer,
+	Did,
 	Base,
+	allowedOperation,
 }

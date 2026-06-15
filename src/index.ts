@@ -3,17 +3,19 @@ import type { IP} from "./types"
 import { ECODE, DCODE, PCODE } from "./error"
 import { Block, Node, NetworkID } from "./node"
 import { Utils } from "./utils/transformUnit"
-import { 
-    Account, Currency, Contract, 
+import {
+    Account, Currency, Contract,
     NFT, DAO,
     // Credential, KYC, STO, Point,
     TimeStamp, Token,  Storage, Payment,
-    Signer
+    Signer, Did, allowedOperation
 } from "./operation"
 import { Operation } from "./operation/api"
 import { BrowserProvider } from "./providers"
 
 export class Mitum extends Generator {
+    static allowedOperation = allowedOperation
+
     private _node: Node
 
     private _account: Account
@@ -33,6 +35,7 @@ export class Mitum extends Generator {
     private _token: Token
     private _storage: Storage
     private _payment: Payment
+    private _did: Did
 
     public ECODE: Object
     public PCODE: Object
@@ -61,6 +64,7 @@ export class Mitum extends Generator {
         this._token = new Token(this.networkID, this.api, this.delegateIP)
         this._storage = new Storage(this.networkID, this.api, this.delegateIP)
         this._payment = new Payment(this.networkID, this.api, this.delegateIP)
+        this._did = new Did(this.networkID, this.api, this.delegateIP)
 
         this.ECODE = ECODE;
         this.PCODE = PCODE;
@@ -88,6 +92,7 @@ export class Mitum extends Generator {
         this._token = new Token(this.networkID, this.api, this.delegateIP)
         this._storage = new Storage(this.networkID, this.api, this.delegateIP)
         this._payment = new Payment(this.networkID, this.api, this.delegateIP)
+        this._did = new Did(this.networkID, this.api, this.delegateIP)
 
         this._utils = new Utils();
     }
@@ -158,6 +163,10 @@ export class Mitum extends Generator {
 
     get payment(): Payment {
         return this._payment
+    }
+
+    get did(): Did {
+        return this._did
     }
 
     get utils(): Utils {

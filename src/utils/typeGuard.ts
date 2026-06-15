@@ -2,7 +2,7 @@ import type { BaseOperation } from "../operation/base/operation"
 import type { Fact } from "../operation/base/fact"
 import { ErrorResponse, SuccessResponse, HintedObject } from "../types"
 import { Hint } from "../common/hint"
-import { Address } from "../key"
+import { Address } from "../key/address"
 import { MitumError, ECODE } from "../error"
 
 export const isOpFact = (operation: any): operation is BaseOperation<Fact> => {

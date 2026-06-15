@@ -10,7 +10,6 @@ import { isSuccessResponse  } from "../../utils"
 import { validateDID } from "../../utils/typeGuard"
 import { IP, TimeStamp as TS, LongString } from "../../types"
 import { Assert, MitumError, ECODE } from "../../error"
-import { HINT } from "../../alias"
 
 type verificationKeyType =
     | "Ed25519VerificationKey2020"
@@ -572,17 +571,3 @@ export class Did extends ContractGenerator {
         return response
     }
 }
-
-export const did = {
-    registerModel(contract: string | Address): AllowedOperation {
-        return new AllowedOperation(HINT.DID.REGISTER_MODEL.OPERATION, contract, true);
-    },
-
-    create(contract: string | Address): AllowedOperation {
-        return new AllowedOperation(HINT.DID.CREATE_DID.OPERATION, contract, true);
-    },
-
-    updateDocument(contract: string | Address): AllowedOperation {
-        return new AllowedOperation(HINT.DID.UPDATE_DID_DOCUMENT.OPERATION, contract, true);
-    },
-};
