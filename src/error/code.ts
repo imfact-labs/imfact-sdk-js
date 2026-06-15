@@ -6,6 +6,7 @@ export type ErrorCode = (
     | typeof ECODE.NFT[keyof typeof ECODE.NFT]
     | typeof ECODE.STO[keyof typeof ECODE.STO]
     | typeof ECODE.DAO[keyof typeof ECODE.DAO]
+    | typeof ECODE.AUTH_DID[keyof typeof ECODE.AUTH_DID]
 )
 
 export const ECODE = {

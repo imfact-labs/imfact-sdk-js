@@ -9,6 +9,7 @@ import TOKEN from "./token"
 import POINT from "./point"
 import STORAGE from "./storage"
 import PAYMENT from "./payment"
+import DID from "./did"
 
 export default {
     FACT_SIGN: "base-fact-sign",
@@ -22,5 +23,6 @@ export default {
     TOKEN,
     POINT,
     STORAGE,
-    PAYMENT
+    PAYMENT,
+    DID
 }

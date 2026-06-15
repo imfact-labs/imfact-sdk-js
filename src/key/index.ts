@@ -176,3 +176,5 @@ export class KeyG extends Generator {
         return new Keys(keys.map(k => k instanceof PubKey ? k : new PubKey(k.key, k.weight)), threshold).checksum.toString()
     }
 }
+
+export { Address, Key, Keys, PubKey, KeyPair }

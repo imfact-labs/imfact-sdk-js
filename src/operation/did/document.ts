@@ -1,0 +1,297 @@
+import { HINT } from "../../alias"
+import { Hint } from "../../common"
+import { HintedObject, IBytes, IHintedObject, LongString } from "../../types"
+import { Key, PubKey } from "../../key"
+import { Assert, MitumError, ECODE } from "../../error"
+import { validateDID } from "../../utils/typeGuard"
+import { AllowedOperation } from "../base"
+import { concatBytes, hexToBytes } from "../../utils/bytes"
+
+import base58 from "bs58";
+import * as secp256k1 from "@noble/secp256k1";
+
+const SECP256K1_PUB_PREFIX = new Uint8Array([0xe7, 0x01]);
+const encoder = new TextEncoder();
+
+abstract class Authentication implements IBytes, IHintedObject {
+    private hint: Hint
+
+    constructor(hint: string) {
+        this.hint = new Hint(hint)
+    }
+
+    toBytes(): Uint8Array {
+        return new Uint8Array()
+    }
+
+    toHintedObject(): HintedObject {
+        return {
+            _hint: this.hint.toString(),
+        }
+    }
+}
+
+export class AsymKeyAuth extends Authentication {
+    readonly id: LongString;
+    readonly type: "Ed25519VerificationKey2020" | "EcdsaSecp256k1VerificationKey2019" | "EcdsaSecp256k1VerificationKeyImFact2025";
+    readonly controller: LongString;
+    readonly publicKey: Key;
+    readonly publicKeyMultibase: undefined | string;
+
+    constructor(
+        id: string | LongString, 
+        type: "Ed25519VerificationKey2020" | "EcdsaSecp256k1VerificationKey2019" | "EcdsaSecp256k1VerificationKeyImFact2025", 
+        controller: string | LongString,
+        publicKey: string | Key
+    ) {
+        super(HINT.DID.AUTHENTICATION);
+        this.id = LongString.from(id);
+        validateDID(this.id.toString(), true);
+        this.type = type;
+        this.controller = LongString.from(controller);
+        this.publicKey = new PubKey(publicKey, 100);
+        this.publicKeyMultibase = this.type == "EcdsaSecp256k1VerificationKey2019" ? this.setPublicKeyMultibase(this.publicKey.toString()) : undefined;
+    }
+
+    private setPublicKeyMultibase(pubKey: string): string {
+        const hex = Key.from(pubKey).noSuffix;
+    
+        let compressed: Uint8Array;
+        try {
+            compressed = hexToBytes(hex);
+        } catch {
+            throw MitumError.detail(ECODE.INVALID_PUBLIC_KEY, "invalid hex public key");
+        }
+    
+        if (compressed.length !== 33) {
+            throw MitumError.detail(ECODE.INVALID_PUBLIC_KEY, "invalid compressed secp256k1 public key length");
+        }
+    
+        let normalizedCompressed: Uint8Array;
+        try {
+            const point = secp256k1.Point.fromHex(compressed);
+            normalizedCompressed = point.toRawBytes(true); // compressed
+        } catch {
+            throw MitumError.detail(ECODE.INVALID_PUBLIC_KEY, "invalid secp256k1 public key");
+        }
+    
+        const data = new Uint8Array(SECP256K1_PUB_PREFIX.length + normalizedCompressed.length);
+        data.set(SECP256K1_PUB_PREFIX, 0);
+        data.set(normalizedCompressed, SECP256K1_PUB_PREFIX.length);
+    
+        return "z" + base58.encode(data);
+    }
+
+    toBytes(): Uint8Array {
+        return concatBytes([
+            super.toBytes(),
+            this.id.toBytes(),
+            encoder.encode(this.type),
+            this.controller.toBytes(),
+            ...(this.publicKeyMultibase
+                ? [encoder.encode(this.publicKeyMultibase)]
+                : []),
+            encoder.encode(this.publicKey.toString()),
+        ])
+    }
+
+    toHintedObject(): HintedObject {
+        return {
+            ...super.toHintedObject(),
+            id: this.id.toString(),
+            controller: this.controller.toString(),
+            type: this.type.toString(),
+            ...(this.publicKeyMultibase
+                ? { publicKeyMultibase: this.publicKeyMultibase }
+                : {}),
+            publicKeyImFact: this.publicKey.toString(),
+        }
+    }
+
+    toString(): string {
+        return this.id.toString()
+    }
+}
+
+export class LinkedAuth extends Authentication {
+    readonly id: LongString;
+    readonly type: "LinkedVerificationMethod";
+    readonly controller: LongString;
+    readonly targetId: LongString;
+    readonly allowed: AllowedOperation[];
+
+    constructor(
+        id: string | LongString,
+        controller: string | LongString,
+        targetId: string | LongString,
+        allowed: AllowedOperation[]
+    ) {
+        super(HINT.DID.AUTHENTICATION);
+        this.id = LongString.from(id);
+        validateDID(this.id.toString(), true);
+        this.type = "LinkedVerificationMethod";
+        this.controller = LongString.from(controller);
+        this.targetId = LongString.from(targetId);
+        validateDID(this.id.toString(), true);
+        this.allowed = allowed.map((el, idx) => {
+            if (el instanceof AllowedOperation) {
+                return el;
+            }
+        
+            try {
+                return new AllowedOperation(
+                    (el as any).operation,
+                    (el as any).contract,
+                );
+            } catch (e) {
+                throw MitumError.detail(
+                    ECODE.INVALID_TYPE,
+                    `allowed[${idx}] cannot be converted to AllowedOperation: ${JSON.stringify(el)}`
+                );
+            }
+        });
+    }
+
+    toBytes(): Uint8Array { 
+        return concatBytes([
+            super.toBytes(), 
+            this.id.toBytes(), 
+            encoder.encode(this.type), 
+            this.controller.toBytes(), 
+            this.targetId.toBytes(), 
+            concatBytes(this.allowed.map((a) => a.toBytes())),
+        ]);
+    }
+
+    toHintedObject(): HintedObject {
+        return {
+            ...super.toHintedObject(),
+            id: this.id.toString(),
+            controller: this.controller.toString(),
+            type: this.type,
+            targetId: this.targetId.toString(),
+            allowed: this.allowed.map((a) => a.toHintedObject()),
+        };
+    }
+
+    toString(): string {
+        return this.id.toString();
+    }
+}
+
+export class Service implements IBytes, IHintedObject {
+    readonly id: LongString;
+    readonly type: LongString;
+    readonly service_end_point: LongString;
+
+    constructor(
+        id: string | LongString,
+        type: string | LongString,
+        service_end_point: string | LongString
+    ) {
+        this.id = LongString.from(id);
+        this.type = LongString.from(type);
+        this.service_end_point = LongString.from(service_end_point);
+    }
+
+    toBytes(): Uint8Array {
+        return concatBytes([
+            this.id.toBytes(),
+            this.type.toBytes(),
+            this.service_end_point.toBytes(),
+        ])
+    }
+
+    toHintedObject(): HintedObject {
+        return {
+            id: this.id.toString(),
+            type: this.type.toString(),
+            service_end_point: this.service_end_point.toString(),
+        }
+    }
+}
+
+export class Document implements IBytes, IHintedObject {
+    private hint: Hint;
+    readonly context: LongString[];
+    readonly id: LongString;
+    readonly authentication: (AsymKeyAuth | LinkedAuth)[];
+    readonly verificationMethod: (AsymKeyAuth | LinkedAuth)[];
+    readonly service?: Service[];
+
+    constructor(
+        context: string | LongString | (string | LongString)[],
+        id: string | LongString,
+        authentication: (AsymKeyAuth | LinkedAuth)[],
+        verificationMethod: (AsymKeyAuth | LinkedAuth)[],
+        service?: Service[]
+    ) {
+        this.hint = new Hint(HINT.DID.DOCUMENT);
+        const contexts = Array.isArray(context) ? context : [context];
+        this.context = contexts.map(ctx => LongString.from(ctx));
+        this.id = LongString.from(id);
+        validateDID(this.id.toString());
+
+        Assert.check(
+            new Set(authentication.map(i => i.toString())).size === authentication.length,
+            MitumError.detail(
+                ECODE.AUTH_DID.INVALID_DOCUMENT,
+                "duplicate authentication id found in authentication"
+            )
+        );
+        this.authentication = authentication;
+        Assert.check(
+            new Set(verificationMethod.map(i => i.toString())).size === verificationMethod.length,
+            MitumError.detail(
+                ECODE.AUTH_DID.INVALID_DOCUMENT,
+                "duplicate authentication id found in verificationMethod"
+            )
+        );
+        this.verificationMethod = verificationMethod;
+
+        if (service !== undefined) {
+            Assert.check(
+                Array.isArray(service) && service.every(s => s instanceof Service),
+                MitumError.detail(
+                    ECODE.AUTH_DID.INVALID_DOCUMENT,
+                    "service must be an array of Service"
+                )
+            );
+            this.service = service;
+        }
+    }
+
+    toBytes(): Uint8Array {
+        return concatBytes([
+            concatBytes(this.context.map(ctx => ctx.toBytes())),
+            this.id.toBytes(),
+            concatBytes(
+                this.authentication.map(el =>
+                    concatBytes([el.toBytes(), Uint8Array.from([1])])
+                )
+            ),
+            concatBytes(this.verificationMethod.map(el => el.toBytes())),
+            ...(this.service
+                ? [concatBytes(this.service.map(s => s.toBytes()))]
+                : []),
+        ]);
+    }
+
+    toHintedObject(): HintedObject {
+        const obj: any = {
+            _hint: this.hint.toString(),
+            "@context": this.context.map(ctx => ctx.toString()),
+            id: this.id.toString(),
+            authentication: this.authentication.map(el => el.toHintedObject()),
+            verificationMethod: this.verificationMethod.map(el => el.toHintedObject()),
+        };
+
+        if (this.service) {
+            obj.service = this.service.map(s => s.toHintedObject());
+        } else {
+            obj.service = [];
+        }
+
+        return obj;
+    }
+}

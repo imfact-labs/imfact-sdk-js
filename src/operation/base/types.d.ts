@@ -25,6 +25,10 @@ export type FactJson = {
     [i: string]: any,
 }
 
+export type Allowed =
+    | { operation: string }
+    | { operation: string; contract: string };
+
 export type OperationJson = {
     _hint: string,
     fact: FactJson,
