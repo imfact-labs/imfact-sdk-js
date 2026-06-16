@@ -10,3 +10,10 @@ export type HintedFactObject = HintedObject & {
 	token: string,
 	hash: string,
 }
+
+// The `extension` block of a serialized UserOperation (account abstraction).
+export type HintedExtensionObject = {
+	authentication: HintedObject,
+	proxy_payer?: HintedObject,
+	settlement: HintedObject
+}

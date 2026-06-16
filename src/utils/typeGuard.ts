@@ -1,6 +1,6 @@
 import type { BaseOperation } from "../operation/base/operation"
 import type { Fact } from "../operation/base/fact"
-import { ErrorResponse, SuccessResponse, HintedObject } from "../types"
+import { ErrorResponse, SuccessResponse, HintedObject, HintedFactObject } from "../types"
 import { Hint } from "../common/hint"
 import { Address } from "../key/address"
 import { MitumError, ECODE } from "../error"
@@ -98,6 +98,25 @@ export const isHintedObjectFromUserOp = (object: any): object is HintedObject =>
     );
   }
   return false;
+};
+
+// Duck-typed to avoid a circular import on UserOperation (mirrors isOpFact):
+// a UserOperation is an operation that additionally carries the AA extension
+// fields (auth / settlement).
+export const isUserOp = (userOperation: any): userOperation is BaseOperation<Fact> => {
+  return isOpFact(userOperation) &&
+    "auth" in userOperation &&
+    "settlement" in userOperation;
+};
+
+export const isHintedFactObject = (obj: unknown): obj is HintedFactObject => {
+  return (
+    typeof obj === "object" &&
+    obj !== null &&
+    "_hint" in obj &&
+    "token" in obj &&
+    "hash" in obj
+  );
 };
 
 export const isErrorResponse = (response: ErrorResponse | SuccessResponse): response is ErrorResponse => {
