@@ -235,7 +235,7 @@ export class Document implements IBytes, IHintedObject {
         Assert.check(
             new Set(authentication.map(i => i.toString())).size === authentication.length,
             MitumError.detail(
-                ECODE.AUTH_DID.INVALID_DOCUMENT,
+                ECODE.DID.INVALID_DOCUMENT,
                 "duplicate authentication id found in authentication"
             )
         );
@@ -243,7 +243,7 @@ export class Document implements IBytes, IHintedObject {
         Assert.check(
             new Set(verificationMethod.map(i => i.toString())).size === verificationMethod.length,
             MitumError.detail(
-                ECODE.AUTH_DID.INVALID_DOCUMENT,
+                ECODE.DID.INVALID_DOCUMENT,
                 "duplicate authentication id found in verificationMethod"
             )
         );
@@ -253,7 +253,7 @@ export class Document implements IBytes, IHintedObject {
             Assert.check(
                 Array.isArray(service) && service.every(s => s instanceof Service),
                 MitumError.detail(
-                    ECODE.AUTH_DID.INVALID_DOCUMENT,
+                    ECODE.DID.INVALID_DOCUMENT,
                     "service must be an array of Service"
                 )
             );

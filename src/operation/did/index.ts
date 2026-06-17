@@ -62,12 +62,12 @@ const validateAuthentication = (auth: unknown, index: number): void => {
     const baseKeys = ["_hint", "id", "type", "controller"] as (keyof (asymkeyAuth | linkedAuth))[];
     
     if (!isOfType<asymkeyAuth | linkedAuth>(auth, baseKeys)) {
-        throw MitumError.detail(ECODE.AUTH_DID.INVALID_AUTHENTICATION, "Invalid authentication type");
+        throw MitumError.detail(ECODE.DID.INVALID_AUTHENTICATION, "Invalid authentication type");
     }
     if ((auth as asymkeyAuth).type === "Ed25519VerificationKey2020" || (auth as asymkeyAuth).type === "EcdsaSecp256k1VerificationKeyImFact2025" ||  (auth as asymkeyAuth).type === "EcdsaSecp256k1VerificationKey2019") {
         const asymkeyAuthKeys = [...baseKeys, "publicKeyImFact"] as (keyof asymkeyAuth)[];
         if (!isOfType<asymkeyAuth>(auth, asymkeyAuthKeys)) {
-            throw MitumError.detail(ECODE.AUTH_DID.INVALID_AUTHENTICATION, `Asymkey authentication at index ${index} is missing required fields.`);
+            throw MitumError.detail(ECODE.DID.INVALID_AUTHENTICATION, `Asymkey authentication at index ${index} is missing required fields.`);
         }
     }
 
@@ -76,14 +76,14 @@ const validateAuthentication = (auth: unknown, index: number): void => {
     
         if (!isOfType<linkedAuth>(auth, linkedAuthKeys)) {
             throw MitumError.detail(
-                ECODE.AUTH_DID.INVALID_AUTHENTICATION,
+                ECODE.DID.INVALID_AUTHENTICATION,
                 `Linked authentication at index ${index} is missing required fields.`
             );
         }
     
         if (!Array.isArray(auth.allowed)) {
             throw MitumError.detail(
-                ECODE.AUTH_DID.INVALID_AUTHENTICATION,
+                ECODE.DID.INVALID_AUTHENTICATION,
                 `The 'allowed' field in linked authentication at index ${index} must be an array.`
             );
         }
@@ -93,13 +93,13 @@ const validateAuthentication = (auth: unknown, index: number): void => {
             !(auth.targetId instanceof LongString)
         ) {
             throw MitumError.detail(
-                ECODE.AUTH_DID.INVALID_AUTHENTICATION,
+                ECODE.DID.INVALID_AUTHENTICATION,
                 `Invalid 'targetId' in linked authentication at index ${index}.`
             );
         }
     }
     else {
-        throw MitumError.detail(ECODE.AUTH_DID.INVALID_AUTHENTICATION, `Unknown authentication type at index ${index}.`);
+        throw MitumError.detail(ECODE.DID.INVALID_AUTHENTICATION, `Unknown authentication type at index ${index}.`);
     }
 };
 
@@ -152,36 +152,36 @@ export class Did extends ContractGenerator {
     
     private validateDocument(doc: unknown): void {
         if (!doc || typeof doc !== "object") {
-            throw MitumError.detail(ECODE.AUTH_DID.INVALID_DOCUMENT, `document must be an object, got ${doc === null ? "null" : typeof doc}`);
+            throw MitumError.detail(ECODE.DID.INVALID_DOCUMENT, `document must be an object, got ${doc === null ? "null" : typeof doc}`);
         }
     
         const d = doc as any;
     
         if (typeof d._hint !== "string") {
-            throw MitumError.detail(ECODE.AUTH_DID.INVALID_DOCUMENT, "_hint must be a string");
+            throw MitumError.detail(ECODE.DID.INVALID_DOCUMENT, "_hint must be a string");
         }
     
         if (!Array.isArray(d["@context"])) {
-            throw MitumError.detail(ECODE.AUTH_DID.INVALID_DOCUMENT, "@context must be an array"
+            throw MitumError.detail(ECODE.DID.INVALID_DOCUMENT, "@context must be an array"
             );
         }
     
         if (!d.id) {
-            throw MitumError.detail(ECODE.AUTH_DID.INVALID_DOCUMENT, "id is required");
+            throw MitumError.detail(ECODE.DID.INVALID_DOCUMENT, "id is required");
         }
     
         if (!Array.isArray(d.authentication)) {
-            throw MitumError.detail(ECODE.AUTH_DID.INVALID_DOCUMENT, "authentication must be an array");
+            throw MitumError.detail(ECODE.DID.INVALID_DOCUMENT, "authentication must be an array");
         }
     
         if (!Array.isArray(d.verificationMethod)) {
-            throw MitumError.detail(ECODE.AUTH_DID.INVALID_DOCUMENT, "verificationMethod must be an array");
+            throw MitumError.detail(ECODE.DID.INVALID_DOCUMENT, "verificationMethod must be an array");
         }
     
         for (const [i, ctx] of d["@context"].entries()) {
             if (typeof ctx !== "string" && !(ctx instanceof LongString)) {
                 throw MitumError.detail(
-                    ECODE.AUTH_DID.INVALID_DOCUMENT,
+                    ECODE.DID.INVALID_DOCUMENT,
                     `@context[${i}] must be string or LongString`
                 );
             }
@@ -191,7 +191,7 @@ export class Did extends ContractGenerator {
             try {
                 validateAuthentication(auth, i);
             } catch (e) {
-                throw MitumError.detail(ECODE.AUTH_DID.INVALID_DOCUMENT, `invalid authentication[${i}]: ${(e as Error).message}`);
+                throw MitumError.detail(ECODE.DID.INVALID_DOCUMENT, `invalid authentication[${i}]: ${(e as Error).message}`);
             }
         });
     
@@ -199,23 +199,23 @@ export class Did extends ContractGenerator {
             try {
                 validateAuthentication(vm, i);
             } catch (e) {
-                throw MitumError.detail(ECODE.AUTH_DID.INVALID_DOCUMENT,`invalid verificationMethod[${i}]: ${(e as Error).message}`);
+                throw MitumError.detail(ECODE.DID.INVALID_DOCUMENT,`invalid verificationMethod[${i}]: ${(e as Error).message}`);
             }
         });
     
         if (d.service !== undefined && d.service !== null) {
             if (!Array.isArray(d.service)) {
-                throw MitumError.detail(ECODE.AUTH_DID.INVALID_DOCUMENT, "service must be an array if provided");
+                throw MitumError.detail(ECODE.DID.INVALID_DOCUMENT, "service must be an array if provided");
             }
     
             d.service.forEach((el: any, i: number) => {
                 if (!el || typeof el !== "object") {
-                    throw MitumError.detail(ECODE.AUTH_DID.INVALID_DOCUMENT, `service[${i}] must be an object`
+                    throw MitumError.detail(ECODE.DID.INVALID_DOCUMENT, `service[${i}] must be an object`
                     );
                 }
     
                 if (!el.id || !el.type || !el.service_end_point) {
-                    throw MitumError.detail(ECODE.AUTH_DID.INVALID_DOCUMENT, `service[${i}] requires id, type, service_end_point`);
+                    throw MitumError.detail(ECODE.DID.INVALID_DOCUMENT, `service[${i}] requires id, type, service_end_point`);
                 }
             });
         }
@@ -225,7 +225,7 @@ export class Did extends ContractGenerator {
     private isSenderDidOwner(sender: string | Address, did: string | LongString, id?: true) {
         Assert.check(
             sender.toString() === validateDID(did.toString(), id).toString(),
-            MitumError.detail(ECODE.AUTH_DID.INVALID_DID, `The owner of did must match the sender(${sender.toString()}). check the did (${did.toString()})`)
+            MitumError.detail(ECODE.DID.INVALID_DID, `The owner of did must match the sender(${sender.toString()}). check the did (${did.toString()})`)
         );
     }
 
@@ -254,7 +254,7 @@ export class Did extends ContractGenerator {
         }
     
         throw MitumError.detail(
-            ECODE.AUTH_DID.INVALID_AUTHENTICATION,
+            ECODE.DID.INVALID_AUTHENTICATION,
             `Unknown authentication type: ${String((auth as any).type)}`
         );
     }
@@ -366,7 +366,7 @@ export class Did extends ContractGenerator {
                 }
             
                 throw MitumError.detail(
-                    ECODE.AUTH_DID.INVALID_AUTHENTICATION,
+                    ECODE.DID.INVALID_AUTHENTICATION,
                     `authentication[${idx}] must be AsymKeyAuth or LinkedAuth instance`
                 );
             }),
@@ -376,7 +376,7 @@ export class Did extends ContractGenerator {
                 }
             
                 throw MitumError.detail(
-                    ECODE.AUTH_DID.INVALID_AUTHENTICATION,
+                    ECODE.DID.INVALID_AUTHENTICATION,
                     `verificationMethods[${idx}] must be AsymKeyAuth or LinkedAuth instance`
                 );
             }),

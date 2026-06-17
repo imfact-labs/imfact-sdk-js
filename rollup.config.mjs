@@ -57,4 +57,39 @@ export default [
       '@noble/hashes',
     ],
   },
+  {
+    input: 'src/account-abstraction.ts',
+    output: {
+      file: 'dist/bundle.aa.cjs.cjs',
+      format: 'cjs',
+      sourcemap: true,
+      exports: 'named',
+    },
+    plugins: commonPlugins,
+    external: [
+      'axios',
+      'js-sha3',
+      'bs58',
+      'big-integer',
+      'int64-buffer',
+      'ethers',
+      '@noble/secp256k1',
+      '@noble/hashes',
+    ],
+  },
+  {
+    input: 'src/account-abstraction.ts',
+    output: {
+      file: 'dist/bundle.aa.esm.mjs',
+      format: 'esm',
+      sourcemap: true,
+    },
+    plugins: commonPlugins,
+    external: [
+      'axios',
+      'ethers',
+      '@noble/secp256k1',
+      '@noble/hashes',
+    ],
+  },
 ];
