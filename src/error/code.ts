@@ -245,11 +245,17 @@ export const DCODE = {
         description: "Duplicate account addresses provided in an invalid manner. (sender=receiver, sender=contract, etc.)",
         subject: ""
     },
+    IV_AA_EXTENSION: {
+        code: "D107",
+        keyword: ["auth and settlement must be present together"],
+        description: "Account abstraction operation extension is malformed: authentication and settlement must both be present.",
+        subject: ""
+    },
     // Related to signature
     IV_SIGN: {
         code: "D201",
         keyword: ["Invalid signing", "BaseNodeSign"],
-        description: "The private key does not match the address or node sign required or the signatures for the multiSig account do not meet the threshold",
+        description: "Signature verification failed. Possible causes: private key does not match the address, node sign required, multiSig signatures below threshold, or network ID mismatch.",
         subject: ""
     },
     IV_ALTERSIGN: {
