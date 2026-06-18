@@ -11,6 +11,7 @@ import {
     Signer, Did, allowedOperation
 } from "./operation"
 import { Operation } from "./operation/api"
+import { AccountAbstraction } from "./operation/accountAbstraction"
 import { BrowserProvider } from "./providers"
 
 export class Mitum extends Generator {
@@ -36,6 +37,7 @@ export class Mitum extends Generator {
     private _storage: Storage
     private _payment: Payment
     private _did: Did
+    private _aa?: AccountAbstraction
 
     public ECODE: Object
     public PCODE: Object
@@ -93,6 +95,7 @@ export class Mitum extends Generator {
         this._storage = new Storage(this.networkID, this.api, this.delegateIP)
         this._payment = new Payment(this.networkID, this.api, this.delegateIP)
         this._did = new Did(this.networkID, this.api, this.delegateIP)
+        this._aa = undefined
 
         this._utils = new Utils();
     }
@@ -174,6 +177,17 @@ export class Mitum extends Generator {
     }
 
     /**
+     * Account-abstraction generator. Builds and signs UserOperations.
+     *
+     * Lazily instantiated: callers that never touch `aa` (e.g. wallets that only
+     * use currency/did/nft) never construct an {@link AccountAbstraction}, so it
+     * costs nothing at runtime for them.
+     */
+    get aa(): AccountAbstraction {
+        return (this._aa ??= new AccountAbstraction(this.networkID, this.api, this.delegateIP))
+    }
+
+    /**
      * Set the API URL to interact with Mitum network.
      * @param {string | IP} [api] - The API URL to set
      */
@@ -224,7 +238,9 @@ export class Mitum extends Generator {
 }
 
 export { BrowserProvider }
-export type { Item, Fact, BaseOperation, Authentication, ProxyPayer, Settlement  } from "./operation/base";
+export { AccountAbstraction } from "./operation/accountAbstraction"
+export { UserOperation, Authentication, ProxyPayer, Settlement } from "./operation/base"
+export type { Item, Fact, BaseOperation } from "./operation/base";
 export type { FeeEstimate } from "./operation/api";
 export type { Account, HDAccount, defaultPath } from "./key/types";
 export { isOpFact, isHintedObject, isHintedObjectFromUserOp } from "./utils/typeGuard"

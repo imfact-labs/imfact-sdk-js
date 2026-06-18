@@ -5,6 +5,28 @@ import { Hint } from "../common/hint"
 import { Address } from "../key/address"
 import { MitumError, ECODE } from "../error"
 
+/**
+ * Cross-bundle-safe `instanceof Hint`.
+ *
+ * When the core (`@imfact/sdk`) and account-abstraction (`@imfact/sdk/account-abstraction`)
+ * bundles are loaded together, each ships its own copy of the `Hint` class, so a `Hint`
+ * created in one bundle is NOT an `instanceof` the `Hint` of the other bundle. A fact built
+ * with the core `Mitum` and then wrapped by `MitumAA` would therefore fail an `instanceof`
+ * check even though it is structurally a valid Hint.
+ *
+ * We accept either a genuine `instanceof` match (fast path, same bundle) or a structural
+ * match by constructor name (cross-bundle). Class names are preserved by the bundler.
+ */
+const isHintLike = (value: any): boolean => {
+  if (value instanceof Hint) return true;
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof value.toString === "function" &&
+    value.constructor?.name === "Hint"
+  );
+};
+
 export const isOpFact = (operation: any): operation is BaseOperation<Fact> => {
   if (typeof operation !== "object" || operation === null) return false;
 
@@ -20,7 +42,7 @@ export const isOpFact = (operation: any): operation is BaseOperation<Fact> => {
   const isIdValid = typeof operation.id === "string";
   const isHintValid =
     typeof operation.hint === "object" &&
-    operation.hint instanceof Hint;
+    isHintLike(operation.hint);
 
   const isFactValid =
     typeof operation.fact === "object" &&
@@ -28,7 +50,7 @@ export const isOpFact = (operation: any): operation is BaseOperation<Fact> => {
     'hint' in operation.fact &&
     'token' in operation.fact &&
     '_hash' in operation.fact &&
-    operation.fact.hint instanceof Hint
+    isHintLike(operation.fact.hint)
 
   const isFactSignsValid = Array.isArray(operation._factSigns);
   const isHashValid = operation._hash instanceof Uint8Array

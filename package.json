@@ -16,11 +16,6 @@
       "types": "./dist/index.d.ts",
       "require": "./dist/bundle.cjs.cjs",
       "import": "./dist/bundle.esm.mjs"
-    },
-    "./account-abstraction": {
-      "types": "./dist/account-abstraction.d.ts",
-      "require": "./dist/bundle.aa.cjs.cjs",
-      "import": "./dist/bundle.aa.esm.mjs"
     }
   },
   "keywords": [
@@ -31,7 +26,8 @@
     "mitum-dao",
     "mitum-storage",
     "mitum-payment",
-    "mitum-timestamp"
+    "mitum-timestamp",
+    "mitum-account-abstraction"
   ],
   "author": "socialinfratech",
   "license": "GPL-3.0-or-later",
