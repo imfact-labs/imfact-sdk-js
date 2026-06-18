@@ -101,6 +101,39 @@ sendOperation();
 
 <br>
 
+### C. Account Abstraction (UserOperation)
+
+Account-abstraction is now built into the core `Mitum` class and exposed through `mitum.aa` — no separate package or import is required. You build a regular operation with any module (currency, did, nft, token, ...) and wrap its `fact` into a `UserOperation`.
+
+```jsx
+const { Mitum } = require('@imfact/sdk');
+
+const mitum = new Mitum("https://testnet.imfact.im");
+
+const runUserOperation = async () => {
+  // 1. Build a normal operation with any module, then take its fact
+  const op = mitum.currency.transfer(sender, recipientAddress, "FACT", 100);
+
+  // 2. Wrap the fact into a UserOperation (DID contract + authentication id)
+  const uop = mitum.aa.createUserOperation(op.fact, didContract, authenticationId);
+
+  // 3. Add the alternative signature, set the settlement (op sender), then sign
+  await uop.addAlterSign(verifierPrivateKey);
+  uop.setSettlement(opSenderAddress);
+  await uop.sign(opSenderPrivateKey);
+
+  // 4. Send it like any other operation
+  const info = await mitum.operation.send(uop);
+  console.log(await info.wait());
+};
+
+runUserOperation();
+```
+
+> `mitum.aa` is lazily instantiated, so applications that never use account abstraction pay no runtime cost.
+
+<br>
+
 ## 3. Important Functions Note
 
 The operation objects created by the SDK (e.g., `mitum.currency.transfer(...)`) are **raw transaction messages**.
@@ -123,8 +156,9 @@ Be sure to check it out before using the SDK.
 ## 5. Exports Overview
 
 #### Classes
-* `Mitum` — Main SDK class for core logic and node communication.
+* `Mitum` — Main SDK class for core logic and node communication. Account abstraction is available via `mitum.aa`.
 * `BrowserProvider` — EIP-1193 Provider for browser wallet (dApp) communication.
+* `AccountAbstraction`, `UserOperation` — Account-abstraction generator and operation.
 
 #### Types
 * `Fact`, `BaseOperation`, `Item`, `Authentication`, `ProxyPayer`, `Settlement`
