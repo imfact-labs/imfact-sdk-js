@@ -14,8 +14,15 @@ export const Version: Setting<string> = (() => {
 	}
 })()
 
+/**
+ * The default network ID (chain) used when a Mitum instance is created without
+ * an explicit `networkID`. This is an immutable constant so that constructing a
+ * Mitum instance never depends on mutable global state.
+ */
+export const DEFAULT_NETWORK_ID = "mitum"
+
 export const NetworkID: Setting<string> = (() => {
-	let v = "mitum"
+	let v = DEFAULT_NETWORK_ID
 	return {
 		get: () => v,
 		set: (val: string) => {

@@ -1,7 +1,7 @@
 import { Generator} from "./types"
 import type { IP} from "./types"
 import { ECODE, DCODE, PCODE } from "./error"
-import { Block, Node, NetworkID } from "./node"
+import { Block, Node, DEFAULT_NETWORK_ID } from "./node"
 import { Utils } from "./utils/transformUnit"
 import {
     Account, Currency, Contract,
@@ -45,8 +45,35 @@ export class Mitum extends Generator {
 
     private _utils: Utils
 
-    public constructor(api?: string, delegateIP?: string) {
-        super(NetworkID.get(), api, delegateIP)
+    /**
+     * Create a Mitum instance — the entry point for interacting with a Mitum network.
+     *
+     * @param {string} [api] - Base URL of the Mitum digest API to connect to
+     * (e.g. `"https://devnet.imfact.im/"`). Can be changed later with {@link Mitum.setAPI}.
+     * @param {object} [options] - Optional connection settings.
+     * @param {string} [options.networkID] - The network ID (a.k.a. chain ID) of the
+     * target network. Defaults to `"mitum"` when omitted. This value is signed into
+     * every operation, so it **must** match the chain ID of the network at `api`;
+     * otherwise the node rejects the operation on signature verification. When you point
+     * `api` at a network with a different chain ID, pass its `networkID` here (or update it
+     * later with {@link Mitum.setNetworkID}).
+     * @param {string} [options.delegateIP] - Optional delegate (proxy) server address for
+     * fee delegation. Leave unset if you are not using a delegate.
+     *
+     * @example
+     * // Connect to a network whose chain ID is the default "mitum"
+     * const mitum = new Mitum("https://devnet.imfact.im/");
+     *
+     * @example
+     * // Connect to a network with a different chain ID
+     * const mitum = new Mitum("https://devnet.imfact.im/", { networkID: "devnet" });
+     *
+     * @example
+     * // With a delegate server
+     * const mitum = new Mitum(api, { networkID: "devnet", delegateIP: "https://.../delegate" });
+     */
+    public constructor(api?: string, options?: { networkID?: string; delegateIP?: string }) {
+        super(options?.networkID ?? DEFAULT_NETWORK_ID, api, options?.delegateIP)
         this._node = new Node(this.api, this.delegateIP)
 
         this._account = new Account(this.networkID,this.api, this.delegateIP)

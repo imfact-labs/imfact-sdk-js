@@ -1,11 +1,11 @@
-import { Version, NetworkID, Config, RangeConfig } from "./config"
+import { Version, NetworkID, DEFAULT_NETWORK_ID, Config, RangeConfig } from "./config"
 
 import { blockApi, nodeApi, operationApi } from "../api"
 import { Generator, IP } from "../types"
 import { getAPIData } from "../api/getAPIData"
 import { Assert, MitumError, ECODE } from "../error"
 export {
-    Version, NetworkID,
+    Version, NetworkID, DEFAULT_NETWORK_ID,
     Config,
     RangeConfig,
 }
