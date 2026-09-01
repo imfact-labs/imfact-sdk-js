@@ -50,7 +50,8 @@ export class Mitum extends Generator {
      *
      * @param {string} [api] - Base URL of the Mitum digest API to connect to
      * (e.g. `"https://devnet.imfact.im/"`). Can be changed later with {@link Mitum.setAPI}.
-     * @param {object} [options] - Optional connection settings.
+     * @param {string | object} [options] - Optional connection settings. For backward
+     * compatibility, a plain string is accepted and treated as `delegateIP`.
      * @param {string} [options.networkID] - The network ID (a.k.a. chain ID) of the
      * target network. Defaults to `"mitum"` when omitted. This value is signed into
      * every operation, so it **must** match the chain ID of the network at `api`;
@@ -71,9 +72,15 @@ export class Mitum extends Generator {
      * @example
      * // With a delegate server
      * const mitum = new Mitum(api, { networkID: "devnet", delegateIP: "https://.../delegate" });
+     *
+     * @example
+     * // Deprecated (still supported): passing delegateIP as a positional string
+     * const mitum = new Mitum(api, "https://.../delegate");
      */
-    public constructor(api?: string, options?: { networkID?: string; delegateIP?: string }) {
-        super(options?.networkID ?? DEFAULT_NETWORK_ID, api, options?.delegateIP)
+    public constructor(api?: string, options?: string | { networkID?: string; delegateIP?: string }) {
+        const opts: { networkID?: string; delegateIP?: string } | undefined =
+            typeof options === "string" ? { delegateIP: options } : options
+        super(opts?.networkID ?? DEFAULT_NETWORK_ID, api, opts?.delegateIP)
         this._node = new Node(this.api, this.delegateIP)
 
         this._account = new Account(this.networkID,this.api, this.delegateIP)
