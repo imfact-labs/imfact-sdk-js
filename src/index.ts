@@ -215,8 +215,18 @@ export class Mitum extends Generator {
     }
 
     /**
-     * Set the API URL to interact with Mitum network.
-     * @param {string | IP} [api] - The API URL to set
+     * Set the API URL used to interact with the Mitum network.
+     *
+     * ⚠️ Switching to a network with a different chain ID? Changing the API alone is
+     * not enough — the network ID is **not** updated automatically. Verify the target
+     * network's chain ID and update it together with {@link Mitum.setNetworkID}.
+     * The network ID is signed into every operation, so a mismatch causes the node to
+     * reject the operation on signature verification.
+     *
+     * @param {string | IP} [api] - The API URL to set.
+     * @example
+     * mitum.setAPI("https://devnet.imfact.im/");
+     * mitum.setNetworkID("devnet"); // required when the chain ID differs
      */
     setAPI(api: string | IP) {
         super.setAPI(api)
@@ -233,8 +243,18 @@ export class Mitum extends Generator {
     }
 
     /**
-     * Set the blockchain network ID (chain). The default value is configured to 'mitum'.
-     * @param {string} [networkID] - The network ID to set.
+     * Set the blockchain network ID (a.k.a. chain ID). The default value is `"mitum"`.
+     *
+     * ⚠️ The network ID must match the chain ID of the network at the current API URL.
+     * It is signed into every operation, so an incorrect value causes the node to reject
+     * the operation on signature verification. When switching to another chain, always
+     * change the API and the network ID together — verify the target network's chain ID
+     * first, then update both (see {@link Mitum.setAPI}).
+     *
+     * @param {string} [networkID] - The network ID (chain ID) to set.
+     * @example
+     * mitum.setAPI("https://devnet.imfact.im/");
+     * mitum.setNetworkID("devnet");
      */
     setNetworkID(networkID: string) {
         super.setNetworkID(networkID)
