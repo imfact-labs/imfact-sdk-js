@@ -116,6 +116,7 @@ export class Mitum extends Generator {
         this._currency = new Currency(this.networkID, this.api, this.delegateIP)
         this._block = new Block(this.api, this.delegateIP)
         this._operation = new Operation(this.networkID, this.api, this.delegateIP)
+        this._signer = new Signer(this.networkID, this.api)
 
         this._contract = new Contract(this.networkID, this.api, this.delegateIP)
         this._nft = new NFT(this.networkID, this.api, this.delegateIP)
@@ -131,7 +132,8 @@ export class Mitum extends Generator {
         this._did = new Did(this.networkID, this.api, this.delegateIP)
         this._aa = undefined
 
-        this._utils = new Utils();
+        // `_utils` is kept: it does not depend on the API or network ID, and
+        // recreating it would reset a decimal set with `utils.setDecimal()`.
     }
 
     get node(): Node {
@@ -229,6 +231,9 @@ export class Mitum extends Generator {
      * network's chain ID and update it together with {@link Mitum.setNetworkID}.
      * The network ID is signed into every operation, so a mismatch causes the node to
      * reject the operation on signature verification.
+     *
+     * The decimal set with `utils.setDecimal()` is kept. If the new network's base
+     * currency uses a different decimal, set it again.
      *
      * @param {string | IP} [api] - The API URL to set.
      * @example
