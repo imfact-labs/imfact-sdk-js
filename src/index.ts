@@ -87,6 +87,7 @@ export class Mitum extends Generator {
         this._currency = new Currency(this.networkID, this.api, this.delegateIP)
         this._block = new Block(this.api, this.delegateIP)
         this._operation = new Operation(this.networkID, this.api, this.delegateIP)
+        this._aa = new AccountAbstraction(this.networkID, this.api, this.delegateIP)
         this._signer = new Signer(this.networkID, this.api)
 
         this._contract = new Contract(this.networkID, this.api, this.delegateIP)
@@ -117,6 +118,7 @@ export class Mitum extends Generator {
         this._block = new Block(this.api, this.delegateIP)
         this._operation = new Operation(this.networkID, this.api, this.delegateIP)
         this._signer = new Signer(this.networkID, this.api)
+        this._aa = new AccountAbstraction(this.networkID, this.api, this.delegateIP)
 
         this._contract = new Contract(this.networkID, this.api, this.delegateIP)
         this._nft = new NFT(this.networkID, this.api, this.delegateIP)
@@ -130,7 +132,6 @@ export class Mitum extends Generator {
         this._storage = new Storage(this.networkID, this.api, this.delegateIP)
         this._payment = new Payment(this.networkID, this.api, this.delegateIP)
         this._did = new Did(this.networkID, this.api, this.delegateIP)
-        this._aa = undefined
 
         // `_utils` is kept: it does not depend on the API or network ID, and
         // recreating it would reset a decimal set with `utils.setDecimal()`.

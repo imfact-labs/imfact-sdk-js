@@ -61,8 +61,15 @@ export class AccountAbstraction extends Generator {
         privateKey = Key.from(privateKey);
         const keypair = KeyPair.fromPrivateKey<KeyPair>(privateKey);
 
+
+        const networkIDBytes = new TextEncoder().encode(this.networkID);
         const hashBytes = base58.decode(hintedUserOp.fact.hash);
-        const alterSign = await keypair.sign(hashBytes);
+
+        const message = new Uint8Array(networkIDBytes.length + hashBytes.length);
+        message.set(networkIDBytes, 0);
+        message.set(hashBytes, networkIDBytes.length);
+
+        const alterSign = await keypair.sign(message);
 
         hintedUserOp.extension.authentication.proof_data = base58.encode(alterSign);
 
